@@ -76,5 +76,6 @@ CLI surface: `dyno init | analyze | compare | view` (built binary at `dist/cli/i
 ## Releasing
 
 Bump `version` in `package.json`, commit, then `git tag vX.Y.Z && git push --tags`. The
-`release` workflow runs the publish gate and `npm publish --provenance` (needs the
-`NPM_TOKEN` repo secret). Don't `npm publish` locally — that ships without provenance.
+`release` workflow runs the publish gate and `npm publish --provenance` via npm Trusted
+Publishing (OIDC — no token; configured on npmjs.com for this repo + `release.yml`). Don't
+`npm publish` locally — that ships without provenance.
