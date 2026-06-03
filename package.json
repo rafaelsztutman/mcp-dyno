@@ -1,0 +1,65 @@
+{
+  "name": "mcp-dyno",
+  "version": "0.1.1",
+  "description": "Put your MCP server on the dyno — holistic, LLM-driven analysis of efficiency, cost, context-bloat, correctness, and reliability, with rigorous before/after error bars.",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "llm",
+    "evaluation",
+    "benchmark",
+    "anthropic",
+    "claude",
+    "agent",
+    "tools"
+  ],
+  "license": "MIT",
+  "author": "Rafael Oliveira",
+  "type": "module",
+  "homepage": "https://github.com/rafaelsztutman/mcp-dyno#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rafaelsztutman/mcp-dyno.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rafaelsztutman/mcp-dyno/issues"
+  },
+  "bin": {
+    "dyno": "./dist/cli/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "postbuild": "chmod +x dist/cli/index.js",
+    "dev": "tsx src/cli/index.ts",
+    "dyno": "tsx src/cli/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "commander": "^13.1.0",
+    "picocolors": "^1.1.1",
+    "yaml": "^2.7.0",
+    "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

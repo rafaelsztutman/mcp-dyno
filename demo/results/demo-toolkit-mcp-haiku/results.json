@@ -1,0 +1,618 @@
+{
+  "kind": "analyze",
+  "runId": "demo-toolkit-mcp-haiku",
+  "server": {
+    "label": "toolkit-mcp"
+  },
+  "model": "claude-haiku-4-5-20251001",
+  "judgeModel": "claude-sonnet-4-6",
+  "auth": "cli",
+  "epochs": 2,
+  "summary": {
+    "label": "toolkit-mcp @haiku",
+    "epochs": 2,
+    "taskCount": 3,
+    "attempts": 6,
+    "failures": 0,
+    "estimated": true,
+    "efficiency": {
+      "tokensMedian": 7050.5,
+      "tokensP90": 7163.5,
+      "tokensIqr": 5092.25,
+      "toolCallsMedian": 0,
+      "discoveryMean": 0,
+      "refetchMean": 0,
+      "latencyP50": 4389,
+      "latencyP95": 5529
+    },
+    "cost": {
+      "perTaskMean": 0.010680641666666666,
+      "source": "reported"
+    },
+    "bloat": {
+      "shares": {
+        "toolDef": 0.9909404605397976,
+        "toolArg": 0,
+        "toolResult": 0,
+        "reasoning": 0.009059539460202564
+      },
+      "toolDefTokensMean": 16258,
+      "attributableShareMean": 1,
+      "floorTokensMean": 0
+    },
+    "reliability": {
+      "hallucinatedRate": 0,
+      "schemaViolationRate": 0,
+      "toolErrorRate": 0,
+      "recoveryRate": 1
+    },
+    "correctness": {
+      "scoreMean": 0.2333333333333333,
+      "judged": true
+    },
+    "perTask": [
+      {
+        "taskId": "01-recent-sends",
+        "n": 2,
+        "failures": 0,
+        "tokensMean": 7094,
+        "toolCallsMean": 0,
+        "discoveryMean": 0,
+        "refetchMean": 0,
+        "latencyMsMean": 4707,
+        "costMean": 0.013239149999999998,
+        "scoreMean": 0.2
+      },
+      {
+        "taskId": "02-top-flow-revenue",
+        "n": 2,
+        "failures": 0,
+        "tokensMean": 3771.5,
+        "toolCallsMean": 0,
+        "discoveryMean": 0,
+        "refetchMean": 0,
+        "latencyMsMean": 4872.5,
+        "costMean": 0.009565575,
+        "scoreMean": 0
+      },
+      {
+        "taskId": "03-largest-segment",
+        "n": 2,
+        "failures": 0,
+        "tokensMean": 3704,
+        "toolCallsMean": 0,
+        "discoveryMean": 0,
+        "refetchMean": 0,
+        "latencyMsMean": 4272,
+        "costMean": 0.009237200000000001,
+        "scoreMean": 0.5
+      }
+    ]
+  },
+  "attempts": [
+    {
+      "taskId": "01-recent-sends",
+      "epoch": 1,
+      "signals": {
+        "totalTokens": 7042,
+        "cacheReadTokens": 30504,
+        "durationMs": 3831,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 462,
+          "total": 65494
+        },
+        "shares": {
+          "toolDef": 0.9929459187101108,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.00705408128988915
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 115.5
+        },
+        "usage": {
+          "billableTotal": 7042,
+          "cacheReadTokens": 30504,
+          "cacheReadShare": 0.812443402759282,
+          "attributedTokens": 16373.5,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0.2,
+      "costUsd": 0.012979149999999998,
+      "judge": [
+        {
+          "criterion": "Lists 5 email campaigns",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Ordered newest-first by send time",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Each campaign has a name",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Scoped to email (not SMS/push)",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated campaign names",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Show me my 5 most recently sent email campaigns on Marketwave.",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "01-recent-sends",
+      "epoch": 2,
+      "signals": {
+        "totalTokens": 7146,
+        "cacheReadTokens": 30504,
+        "durationMs": 5583,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 925,
+          "total": 65957
+        },
+        "shares": {
+          "toolDef": 0.9859757114483679,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.014024288551632125
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 231.25
+        },
+        "usage": {
+          "billableTotal": 7146,
+          "cacheReadTokens": 30504,
+          "cacheReadShare": 0.810199203187251,
+          "attributedTokens": 16489.25,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0.2,
+      "costUsd": 0.01349915,
+      "judge": [
+        {
+          "criterion": "Lists 5 email campaigns",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Ordered newest-first by send time",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Each campaign has a name",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Scoped to email (not SMS/push)",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated campaign names",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Show me my 5 most recently sent email campaigns on Marketwave.",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "02-top-flow-revenue",
+      "epoch": 1,
+      "signals": {
+        "totalTokens": 7181,
+        "cacheReadTokens": 30504,
+        "durationMs": 5367,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 672,
+          "total": 65704
+        },
+        "shares": {
+          "toolDef": 0.9897723121879947,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.010227687812005358
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 168
+        },
+        "usage": {
+          "billableTotal": 7181,
+          "cacheReadTokens": 30504,
+          "cacheReadShare": 0.809446729467958,
+          "attributedTokens": 16426,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0,
+      "costUsd": 0.01363665,
+      "judge": [
+        {
+          "criterion": "Names a single specific flow",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Reports a concrete revenue figure",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "About flows (not campaigns)",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated flow names",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated flow names",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Which of my Marketwave automation flows has driven the most revenue?",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "02-top-flow-revenue",
+      "epoch": 2,
+      "signals": {
+        "totalTokens": 362,
+        "cacheReadTokens": 37245,
+        "durationMs": 4378,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 565,
+          "total": 65597
+        },
+        "shares": {
+          "toolDef": 0.9913868012256658,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.008613198774334191
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 141.25
+        },
+        "usage": {
+          "billableTotal": 362,
+          "cacheReadTokens": 37245,
+          "cacheReadShare": 0.990374132475337,
+          "attributedTokens": 16399.25,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0,
+      "costUsd": 0.0054945,
+      "judge": [
+        {
+          "criterion": "Names a single specific flow",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Reports a concrete revenue figure",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "About flows (not campaigns)",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated flow names",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "No fabricated flow names",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Which of my Marketwave automation flows has driven the most revenue?",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "03-largest-segment",
+      "epoch": 1,
+      "signals": {
+        "totalTokens": 7059,
+        "cacheReadTokens": 30504,
+        "durationMs": 4144,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 562,
+          "total": 65594
+        },
+        "shares": {
+          "toolDef": 0.9914321431838278,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.00856785681617221
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 140.5
+        },
+        "usage": {
+          "billableTotal": 7059,
+          "cacheReadTokens": 30504,
+          "cacheReadShare": 0.8120757128024918,
+          "attributedTokens": 16398.5,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0.5,
+      "costUsd": 0.0130454,
+      "judge": [
+        {
+          "criterion": "Identifies a single specific segment by name",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Reports a concrete profile count",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "About segments (not lists)",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        },
+        {
+          "criterion": "No fabricated segment names",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Which of my Marketwave segments has the most profiles right now?",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "03-largest-segment",
+      "epoch": 2,
+      "signals": {
+        "totalTokens": 349,
+        "cacheReadTokens": 37240,
+        "durationMs": 4400,
+        "toolCalls": 0,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 0,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 65032,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 384,
+          "total": 65416
+        },
+        "shares": {
+          "toolDef": 0.9941298764828177,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 0.005870123517182341
+        },
+        "tokensEst": {
+          "toolDef": 16258,
+          "toolArg": 0,
+          "toolResult": 0,
+          "reasoning": 96
+        },
+        "usage": {
+          "billableTotal": 349,
+          "cacheReadTokens": 37240,
+          "cacheReadShare": 0.9907153688579106,
+          "attributedTokens": 16354,
+          "floorTokens": 0,
+          "attributableShare": 1
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 0.5,
+      "costUsd": 0.005429,
+      "judge": [
+        {
+          "criterion": "Identifies a single specific segment by name",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "Reports a concrete profile count",
+          "verdict": "FAIL",
+          "reason": "Not satisfied (e.g. no data retrieved)."
+        },
+        {
+          "criterion": "About segments (not lists)",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        },
+        {
+          "criterion": "No fabricated segment names",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        }
+      ],
+      "log": {
+        "finalText": "I don't have access to your marketing platform, so I can't retrieve that. Please connect a data source.",
+        "turns": [
+          {
+            "userPrompt": "Which of my Marketwave segments has the most profiles right now?",
+            "assistantText": "I don't have access to your marketing platform, so I can't retrieve that.",
+            "toolCalls": []
+          }
+        ]
+      },
+      "failed": false
+    }
+  ]
+}
