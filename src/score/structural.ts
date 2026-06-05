@@ -6,7 +6,7 @@ import type { StructuralFlags, ToolDef, Transcript } from "../types.js";
  */
 
 /** Shallow JSON-Schema check: required top-level props present, primitive types match. */
-function violatesSchema(args: unknown, schema: Record<string, unknown>): boolean {
+export function violatesSchema(args: unknown, schema: Record<string, unknown>): boolean {
   if (schema.type === "object" || schema.properties) {
     if (typeof args !== "object" || args === null || Array.isArray(args)) return true;
     const obj = args as Record<string, unknown>;

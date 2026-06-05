@@ -26,6 +26,12 @@ export const DEFAULTS = {
   outDir: ".dyno",
 };
 
+/**
+ * Server Ergonomics: a tool whose mean result payload exceeds this many (estimated)
+ * tokens per call is flagged as "heavy" — a candidate for pagination / field-selection.
+ */
+export const DEFAULT_HEAVY_PAYLOAD_TOKENS = 1500;
+
 /** "billable tokens" convention — single source of truth. */
 export function billableTokens(u: {
   inputTokens: number;

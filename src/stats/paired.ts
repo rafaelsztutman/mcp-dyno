@@ -151,10 +151,81 @@ export interface PairedResult {
   requiredN: number;
   resolvable: boolean;
   unpairedSe: number;
+  /** Distribution-free two-sided p (paired sign-flip permutation) — robust at small n. */
+  permutationP: number;
 }
 
 export function mean(xs: number[]): number {
   return xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0;
+}
+
+/** Deterministic PRNG (mulberry32) so bootstrap/sampled tests are reproducible. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a |= 0;
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/**
+ * Two-sided paired permutation (sign-flip) p-value — distribution-free, so it
+ * doesn't assume the per-task differences are normal (the weak spot of a t-test on
+ * binary pass/fail at small n). Exact (all 2^n sign assignments) for n ≤ 20;
+ * seeded-sampled above that. Statistic = |sum of differences|.
+ */
+export function pairedPermutationP(diffs: number[], opts: { samples?: number; seed?: number } = {}): number {
+  const n = diffs.length;
+  if (n === 0) return 1;
+  const obs = Math.abs(diffs.reduce((a, b) => a + b, 0));
+  const EXACT_MAX = 20;
+  const eps = 1e-9;
+
+  if (n <= EXACT_MAX) {
+    let atLeast = 0;
+    const total = 2 ** n;
+    for (let mask = 0; mask < total; mask++) {
+      let s = 0;
+      for (let i = 0; i < n; i++) s += (mask >> i) & 1 ? diffs[i]! : -diffs[i]!;
+      if (Math.abs(s) >= obs - eps) atLeast++;
+    }
+    return atLeast / total;
+  }
+
+  const samples = opts.samples ?? 20000;
+  const rnd = mulberry32(opts.seed ?? 0x5eed);
+  let atLeast = 0;
+  for (let k = 0; k < samples; k++) {
+    let s = 0;
+    for (let i = 0; i < n; i++) s += rnd() < 0.5 ? diffs[i]! : -diffs[i]!;
+    if (Math.abs(s) >= obs - eps) atLeast++;
+  }
+  return atLeast / samples;
+}
+
+/** Percentile bootstrap CI for the mean of a sample (seeded → reproducible). */
+export function bootstrapCI(
+  xs: number[],
+  opts: { iters?: number; alpha?: number; seed?: number } = {},
+): [number, number] {
+  const n = xs.length;
+  if (n < 2) return [mean(xs), mean(xs)];
+  const iters = opts.iters ?? 10000;
+  const alpha = opts.alpha ?? 0.05;
+  const rnd = mulberry32(opts.seed ?? 0x5eed);
+  const means: number[] = new Array(iters);
+  for (let k = 0; k < iters; k++) {
+    let s = 0;
+    for (let i = 0; i < n; i++) s += xs[Math.floor(rnd() * n)]!;
+    means[k] = s / n;
+  }
+  means.sort((a, b) => a - b);
+  const lo = means[Math.floor((alpha / 2) * iters)]!;
+  const hi = means[Math.min(iters - 1, Math.ceil((1 - alpha / 2) * iters) - 1)]!;
+  return [lo, hi];
 }
 
 export function stdev(xs: number[]): number {
@@ -224,5 +295,6 @@ export function pairedCompare(
     requiredN,
     resolvable: p < alpha,
     unpairedSe,
+    permutationP: pairedPermutationP(diffs),
   };
 }

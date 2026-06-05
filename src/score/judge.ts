@@ -50,6 +50,45 @@ export interface JudgeOutcome {
   score: number | null;
 }
 
+export interface EnsembleOutcome {
+  /** Mean of the per-judge scores (null if none scored). */
+  score: number | null;
+  perModel: Array<{ model: string; score: number | null }>;
+  /** 1 = judges agreed perfectly; lower = they diverged. Null when <2 judges scored. */
+  agreement: number | null;
+  /** Verdicts from the first judge that produced any (for display). */
+  verdicts: JudgeResult[];
+}
+
+/** Pure: combine per-judge scores into a mean + an agreement metric (1 − 2·stdev, clamped). */
+export function ensembleStats(scores: Array<number | null>): { score: number | null; agreement: number | null } {
+  const scored = scores.filter((s): s is number => s !== null);
+  if (!scored.length) return { score: null, agreement: null };
+  const m = scored.reduce((a, b) => a + b, 0) / scored.length;
+  if (scored.length < 2) return { score: m, agreement: null };
+  const sd = Math.sqrt(scored.reduce((s, x) => s + (x - m) ** 2, 0) / scored.length);
+  return { score: m, agreement: Math.max(0, Math.min(1, 1 - 2 * sd)) };
+}
+
+/** Grade one attempt with several judges (ideally cross-family) and report their agreement. */
+export async function judgeEnsemble(
+  task: Task,
+  finalAnswer: string,
+  opts: { models: string[]; auth: AuthMode; toolSummary?: string },
+): Promise<EnsembleOutcome> {
+  const results = await Promise.all(
+    opts.models.map((model) =>
+      judgeAttempt(task, finalAnswer, { model, auth: opts.auth, toolSummary: opts.toolSummary }).catch(
+        () => ({ verdicts: [], score: null }) as JudgeOutcome,
+      ),
+    ),
+  );
+  const perModel = opts.models.map((model, i) => ({ model, score: results[i]!.score }));
+  const { score, agreement } = ensembleStats(perModel.map((p) => p.score));
+  const verdicts = results.find((r) => r.verdicts.length)?.verdicts ?? [];
+  return { score, perModel, agreement, verdicts };
+}
+
 /**
  * Grade one attempt's final answer against the task criteria. Uses the same auth
  * mode as the driver (CLI = $0 subscription). Returns score=null if the task has
