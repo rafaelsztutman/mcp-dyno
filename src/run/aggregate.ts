@@ -1,5 +1,6 @@
-import type { AttemptResult, Channel } from "../types.js";
+import type { AttemptResult, Channel, ErgonomicsSummary } from "../types.js";
 import { mean, median, p90, iqr, percentile } from "../measure/metrics.js";
+import { aggregateErgonomics } from "../measure/ergonomics.js";
 
 export interface TaskAggregate {
   taskId: string;
@@ -45,6 +46,7 @@ export interface ServerSummary {
     recoveryRate: number; // among attempts that hit an error
   };
   correctness: { scoreMean: number | null; judged: boolean };
+  ergonomics: ErgonomicsSummary;
   perTask: TaskAggregate[];
 }
 
@@ -129,6 +131,7 @@ export function aggregateServer(label: string, epochs: number, attempts: Attempt
       scoreMean: scored.length ? mean(scored.map((a) => a.score as number)) : null,
       judged: scored.length > 0,
     },
+    ergonomics: aggregateErgonomics(attempts),
     perTask,
   };
 }

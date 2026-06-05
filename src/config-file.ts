@@ -2,6 +2,7 @@ import { readFile, access } from "node:fs/promises";
 import { resolve } from "node:path";
 import type { ServerSpec, Transport } from "./types.js";
 import type { ModelPrice } from "./pricing/prices.js";
+import type { Budgets } from "./run/gate.js";
 
 /** A server definition in dyno.config.json — each carries its OWN env/headers,
  * which is what lets `compare` target two servers with different secrets/auth. */
@@ -27,6 +28,8 @@ export interface DynoConfig {
   concurrency?: number;
   judge?: boolean;
   prices?: Record<string, ModelPrice>;
+  /** CI thresholds for `dyno assert`. */
+  budgets?: Budgets;
 }
 
 const DEFAULT_CONFIG_FILE = "dyno.config.json";

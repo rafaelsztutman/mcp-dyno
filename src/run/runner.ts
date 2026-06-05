@@ -2,11 +2,15 @@ import type { AttemptResult, AuthMode, Decomposition, EfficiencySignals, ServerS
 import { createConnection } from "../mcp/connection.js";
 import { ApiLoopDriver } from "../engine/api-loop-driver.js";
 import { ClaudeCliDriver } from "../engine/claude-cli-driver.js";
+import { OpenAiLoopDriver } from "../engine/openai-loop-driver.js";
+import { resolveModel, type ResolvedModel } from "../engine/providers.js";
 import type { ModelDriver } from "../engine/driver.js";
 import { decompose } from "../measure/decompose.js";
+import { attemptErgonomics, emptyErgonomics } from "../measure/ergonomics.js";
 import { extractSignals } from "../measure/metrics.js";
 import { structuralFlags } from "../score/structural.js";
 import { judgeAttempt } from "../score/judge.js";
+import { checkExpectations, hasExpectations } from "../score/expectations.js";
 import { costUsd, type ModelPrice } from "../pricing/prices.js";
 import { DEFAULT_JUDGE_MODEL } from "../config.js";
 import type { AttemptLog, JudgeResult, Transcript } from "../types.js";
@@ -37,7 +41,8 @@ export interface RunInput {
   model: string;
   auth: AuthMode;
   concurrency: number;
-  bytesPerToken: number;
+  /** Byte→token tariff override; defaults to the resolved provider's value. */
+  bytesPerToken?: number;
   priceOverrides?: Record<string, ModelPrice>;
   /** CLI driver only: pass --dangerously-skip-permissions (opt-in, off by default). */
   skipPermissions?: boolean;
@@ -57,7 +62,8 @@ export type ProgressEvent =
   | { kind: "tools"; count: number }
   | { kind: "attempt"; taskId: string; epoch: number; failed: boolean; error?: string };
 
-function makeDriver(auth: AuthMode, skipPermissions?: boolean): ModelDriver {
+function makeDriver(resolved: ResolvedModel, auth: AuthMode, skipPermissions?: boolean): ModelDriver {
+  if (resolved.provider.kind === "openai-compat") return new OpenAiLoopDriver(resolved.provider);
   return auth === "cli" ? new ClaudeCliDriver({ skipPermissions }) : new ApiLoopDriver();
 }
 
@@ -102,7 +108,7 @@ export async function listServerTools(server: ServerSpec): Promise<ToolDef[]> {
   }
 }
 
-async function runPool<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
+export async function runPool<T>(items: T[], limit: number, worker: (item: T) => Promise<void>): Promise<void> {
   let idx = 0;
   const runners = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
     while (idx < items.length) {
@@ -117,7 +123,9 @@ export async function runServer(input: RunInput, onProgress?: (e: ProgressEvent)
   const tools = input.tools ?? (await listServerTools(input.server));
   onProgress?.({ kind: "tools", count: tools.length });
 
-  const driver = makeDriver(input.auth, input.skipPermissions);
+  const resolved = resolveModel(input.model);
+  const bytesPerToken = input.bytesPerToken ?? resolved.provider.bytesPerToken;
+  const driver = makeDriver(resolved, input.auth, input.skipPermissions);
   const jobs: Array<{ task: Task; epoch: number }> = [];
   for (const task of input.tasks) {
     for (let e = 1; e <= input.epochs; e++) jobs.push({ task, epoch: e });
@@ -127,19 +135,19 @@ export async function runServer(input: RunInput, onProgress?: (e: ProgressEvent)
   await runPool(jobs, input.concurrency, async ({ task, epoch }) => {
     try {
       let transcript;
-      if (input.auth === "api") {
+      if (driver.usesConnection) {
         const conn = createConnection(input.server);
         await conn.connect();
         try {
-          transcript = await driver.drive({ task, tools, conn, server: input.server, model: input.model });
+          transcript = await driver.drive({ task, tools, conn, server: input.server, model: resolved.model });
         } finally {
           await conn.close();
         }
       } else {
-        transcript = await driver.drive({ task, tools, server: input.server, model: input.model });
+        transcript = await driver.drive({ task, tools, server: input.server, model: resolved.model });
       }
 
-      const decomposition = decompose(transcript, input.bytesPerToken);
+      const decomposition = decompose(transcript, bytesPerToken);
       const totalsForCost = {
         inputTokens: 0,
         outputTokens: 0,
@@ -152,11 +160,16 @@ export async function runServer(input: RunInput, onProgress?: (e: ProgressEvent)
         totalsForCost.cacheCreationTokens += t.usage.cacheCreationTokens;
         totalsForCost.cacheReadTokens += t.usage.cacheReadTokens;
       }
-      const cost = transcript.reportedCostUsd ?? costUsd(input.model, totalsForCost, input.priceOverrides);
+      const cost = transcript.reportedCostUsd ?? costUsd(resolved.model, totalsForCost, input.priceOverrides);
 
       let judge: JudgeResult[] = [];
       let score: number | null = null;
-      if (input.judge) {
+      if (hasExpectations(task.expect)) {
+        // Deterministic ground-truth checks score correctness directly (no judge, no self-judging loop).
+        const eo = checkExpectations(transcript, task.expect);
+        judge = eo.verdicts;
+        score = eo.score;
+      } else if (input.judge) {
         const toolSummary = transcript.turns
           .flatMap((t) => t.toolCalls)
           .map((c) => `${c.name}${c.isError ? " (error)" : ""}`)
@@ -176,6 +189,7 @@ export async function runServer(input: RunInput, onProgress?: (e: ProgressEvent)
         signals: extractSignals(transcript),
         decomposition,
         structural: structuralFlags(transcript, tools),
+        ergonomics: attemptErgonomics(transcript, tools, bytesPerToken),
         judge,
         score,
         costUsd: cost,
@@ -191,6 +205,7 @@ export async function runServer(input: RunInput, onProgress?: (e: ProgressEvent)
         signals: zeroSignals(),
         decomposition: zeroDecomp(),
         structural: { hallucinatedToolCalls: 0, schemaViolations: 0, toolErrors: 0, recoveredFromError: false },
+        ergonomics: emptyErgonomics(),
         judge: [],
         score: null,
         failed: true,
