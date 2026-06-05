@@ -7,14 +7,16 @@
 > Put your MCP server on the dyno.
 
 `mcp-dyno` is an open-source CLI that measures how good your [Model Context
-Protocol](https://modelcontextprotocol.io) server is **when an LLM actually drives it** — across five
-perspectives in a single run:
+Protocol](https://modelcontextprotocol.io) server is **when an LLM actually drives it** — with Claude,
+GPT, Gemini, or any OpenAI-compatible model — across five perspectives in a single run:
 
 - **Efficiency** — tokens/task, tool-call & round-trip counts, latency
 - **Cost** — $/task at real model prices
 - **Context-bloat** — how much of the window your tool definitions, args, and results actually eat
 - **Correctness** — task success (LLM-judged)
 - **Reliability** — `pass^k` consistency, hallucinated-tool rate, schema adherence, error recovery
+- **Server ergonomics** — grades your *design*, not the model: per-tool result-payload weight (what to
+  paginate) and first-call affordance (which descriptions/schemas the model keeps mis-reading) → a fix-list
 
 Then it lets you **prove** an optimization worked with rigorous before/after paired statistics — not
 vibes.
@@ -43,6 +45,12 @@ npx mcp-dyno analyze --server "node ./build/index.js"
 # Bring your own tasks, and score correctness with an LLM judge
 npx mcp-dyno analyze --server "node ./build/index.js" --tasks ./dyno-tasks.yaml --judge
 
+# Use a built-in, versioned task corpus (comparable across servers)
+npx mcp-dyno analyze --server "node ./build/index.js" --corpus filesystem@1 --judge
+
+# Grade a run (per-pillar) and emit a committable badge
+npx mcp-dyno scorecard --badge mcp-dyno-badge.json
+
 # Prove an optimization: before vs after (paired stats)
 npx mcp-dyno compare \
   --base "node ./build/index.js"      \
@@ -52,17 +60,44 @@ npx mcp-dyno compare \
 npx mcp-dyno view        # → http://localhost:4000
 ```
 
-### Auth — minimize cost
+### Use it as a CI gate
 
-Use either path:
+```bash
+# Fail the build if a budget is breached…
+npx mcp-dyno assert --config dyno.config.json --summary-md "$GITHUB_STEP_SUMMARY"
+# …or if the PR resolvably regresses vs the base (noise never fails):
+npx mcp-dyno compare --base "…" --head "…" --tasks tasks.yaml --fail-on-regression
+```
+
+Both exit non-zero only on real signal. See [`docs/ci.md`](docs/ci.md) for a ready-to-copy
+GitHub Actions workflow.
+
+### Models & auth
+
+Pick the driver model with `--model`. A bare id (e.g. `claude-sonnet-4-6`) is Claude; otherwise use
+`<provider>/<id>`:
+
+```bash
+npx mcp-dyno analyze --server "…" --model openai/gpt-4o-mini      # needs OPENAI_API_KEY
+npx mcp-dyno analyze --server "…" --model google/gemini-2.0-flash # needs GEMINI_API_KEY
+npx mcp-dyno analyze --server "…" --model openrouter/meta-llama/llama-3.1-70b-instruct
+```
+
+Providers: `anthropic` (default), `openai`, `google`, `openrouter`, `groq`, `together`, plus any
+OpenAI-compatible endpoint via `<PROVIDER>_BASE_URL`. Run the same task set under several models and
+compare them in the **model matrix** (`dyno view`) for a cross-model robustness read.
+
+For **Claude specifically**, two auth paths trade cost for fidelity:
 
 - **`--auth cli`** (subscription): drives via your existing `claude` CLI sign-in — **no Anthropic API
   spend**. Tool definitions are still measured exactly, but Claude Code's own system-prompt inflates the
   billable floor, so context-bloat is labeled *estimated*.
 - **`--auth api`** (default): our own agent loop over the Anthropic Messages API (`ANTHROPIC_API_KEY`).
-  Highest fidelity — exact token accounting, minimal floor.
+  Exact token accounting, minimal floor.
 
-The LLM judge (`--judge`, off by default) and task auto-generation use the same auth path.
+Non-Claude providers always drive over their API (no subscription path) with exact usage accounting.
+The LLM judge (`--judge`, off by default) and task auto-generation can run on **any** provider — point
+`--judge-model` at a *different* family (e.g. drive Claude, judge `openai/gpt-4o`) for cross-family grading.
 
 ### Config
 

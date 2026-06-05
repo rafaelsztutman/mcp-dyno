@@ -12,7 +12,9 @@ npm test           # vitest, offline only
 npm run dev -- <args>   # run the CLI via tsx, e.g. npm run dev -- analyze --help
 ```
 
-CLI surface: `dyno init | analyze | compare | view` (built binary at `dist/cli/index.js`).
+CLI surface: `dyno init | analyze | compare | judge | assert | scorecard | view`
+(built binary at `dist/cli/index.js`). `judge` re-scores a saved run; `assert`/`compare
+--fail-on-regression` are the CI gates; `scorecard` grades a run + emits a badge.
 
 ## Layout (`src/`)
 
@@ -58,6 +60,13 @@ CLI surface: `dyno init | analyze | compare | view` (built binary at `dist/cli/i
   same auth as the driver (CLI = $0 subscription, API = key).
 - **Two fidelity levels**: API driver = exact tokens; CLI driver = decomposition is *estimated*
   (Claude Code's own system prompt inflates the floor). The dashboard labels this `*estimated`.
+- **CLI driver tool isolation** (`claude-cli-driver.ts`): the model is given Claude Code's own
+  built-ins too, so we (a) `--disallow` the **bypass** built-ins (`BYPASS_BUILTINS`: Bash/Read/…)
+  so it can't do the task outside the SUT, but (b) deliberately keep **ToolSearch** enabled —
+  current Claude Code surfaces MCP tools *through* ToolSearch, so disallowing it blocks all MCP
+  access — and (c) filter every built-in (`CLAUDE_CODE_BUILTINS`, incl. ToolSearch) out of the
+  recorded transcript so SUT metrics reflect only the server's tools. Note: Claude Code can't
+  launch a `node_modules/.bin/tsx …` shim as an MCP server; use a plain `node ./dist/...` command.
 
 ## Testing
 
