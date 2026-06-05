@@ -1,0 +1,39 @@
+# HTTP-fetch MCP archetype — portable tasks for servers that retrieve web content.
+# Uses example.com / IANA example-domain pages, which are stable and designed for testing.
+- id: fetch-title
+  category: baseline
+  prompt: "Fetch https://example.com and tell me the page's title."
+  criteria:
+    - "Uses a fetch/HTTP tool to retrieve the URL."
+    - "Reports a title grounded in the fetched content (for example.com, 'Example Domain')."
+    - "Does not answer from memory without fetching."
+
+- id: fetch-summarize
+  category: short
+  prompt: "Fetch https://example.com and summarize the page in one sentence."
+  criteria:
+    - "Retrieves the page via a tool before summarizing."
+    - "The summary reflects the actual returned page content."
+
+- id: fetch-extract-links
+  category: medium
+  prompt: "Fetch https://example.com and list any links (URLs) found on the page."
+  criteria:
+    - "Fetches the page via a tool."
+    - "Reports links actually present in the returned content (example.com links to an IANA page); does not fabricate links."
+
+- id: fetch-error-handling
+  category: short
+  prompt: "Fetch https://example.com/this-path-should-404-xyz and tell me what happened."
+  criteria:
+    - "Attempts the fetch via a tool."
+    - "Reports the error or non-200 status rather than inventing page content."
+
+- id: fetch-two-step
+  category: medium
+  turns:
+    - "Fetch https://example.com and note its main heading."
+    - "Now fetch https://www.iana.org/help/example-domains and tell me whether it mentions example domains."
+  criteria:
+    - "Fetches both URLs via tools across the two turns."
+    - "Answers the second question using content from the second fetch, not the first."

@@ -1,0 +1,42 @@
+# Filesystem MCP archetype — portable tasks for servers that read/write/search files.
+# Prompts are tool-name-agnostic; criteria are behavioral so a judge can check any server.
+- id: fs-list-root
+  category: baseline
+  prompt: "List the files and directories in the current working directory."
+  criteria:
+    - "Uses a tool to list directory contents rather than guessing."
+    - "Returns actual entries from the directory (real file/dir names)."
+    - "Does not fabricate files that were not returned by a tool."
+
+- id: fs-read-readme
+  category: short
+  prompt: "Find the most README-like file in the project, read it, and summarize what the project does in 2-3 sentences."
+  criteria:
+    - "Locates a README-like file using listing/search tools before reading."
+    - "Reads the file's contents via a tool."
+    - "The summary reflects the actual file contents, not generic filler."
+
+- id: fs-find-todos
+  category: medium
+  prompt: "Search the source files for any TODO or FIXME comments and report the file (and line if available) for each match."
+  criteria:
+    - "Searches across multiple files rather than a single hard-coded path."
+    - "Reports file paths for matches that actually exist in the results."
+    - "Does not invent matches; if none are found, says so clearly."
+
+- id: fs-create-and-verify
+  category: medium
+  turns:
+    - "Create a file named dyno-scratch.txt containing exactly the text: hello from mcp-dyno"
+    - "Now read that same file back and confirm its exact contents."
+  criteria:
+    - "Creates the file using a write tool in the first turn."
+    - "Reads the same file back in the second turn (not from memory)."
+    - "Confirms the contents match 'hello from mcp-dyno' exactly."
+
+- id: fs-safe-missing
+  category: short
+  prompt: "Read the file ./definitely-does-not-exist-9f3a.txt and tell me what's in it."
+  criteria:
+    - "Attempts the read via a tool."
+    - "Reports that the file does not exist or the read failed, rather than fabricating contents."
