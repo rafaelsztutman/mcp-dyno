@@ -34,6 +34,7 @@ th:first-child,td:first-child{text-align:left}th{color:var(--dim);font-weight:60
 .cmpbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin-bottom:20px;font-size:13px}
 .cmpbar .lbl{color:var(--dim)}
 select{background:var(--bg);color:var(--fg);border:1px solid var(--border);border-radius:7px;padding:5px 8px;font:inherit;max-width:300px}
+select[multiple]{height:auto;min-width:240px;vertical-align:top}
 button{background:var(--cyan);color:#06222a;border:0;border-radius:7px;padding:6px 14px;font:inherit;font-weight:700;cursor:pointer}
 button:hover{filter:brightness(1.1)}
 .task{border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:10px}
@@ -76,7 +77,8 @@ const SCRIPT = [
   "'schema viol./task':'Tool calls/task whose arguments violate the tool input schema.',",
   "'tool errors/task':'Tool calls/task that returned an error.',",
   "'recovery':'Of attempts that hit a tool error, the share that still produced a final answer.',",
-  "'pass-rate':'LLM-judge correctness: mean over criteria (PASS=1, PARTIAL=.5, FAIL=0). Indicative if criteria were auto-generated.'};",
+  "'pass-rate':'LLM-judge correctness: mean over criteria (PASS=1, PARTIAL=.5, FAIL=0). Indicative if criteria were auto-generated.',",
+  "'first-call success':'Share of attempts whose FIRST tool call was a real tool with valid arguments and no error \\u2014 how learnable your tool surface is from descriptions alone.'};",
   "function row(k,v){var d=DEFS[k];var t=d?(' title=\"'+esc(d)+'\"'):'';return '<div class=row><span class=k'+t+'>'+k+'</span><span class=v>'+v+'</span></div>';}",
   "function card(title,body,extra){return '<div class=card><h3>'+title+(extra||'')+'</h3>'+body+'</div>';}",
   "function bloatBar(b){var s=b.shares;var seg=function(c,w){return '<span style=\"background:'+c+';width:'+(w*100)+'%\"></span>';};",
@@ -111,8 +113,18 @@ const SCRIPT = [
   "    return '<div class=task><div class=taskhead><b>'+esc(id)+'</b> <span class=muted>score '+avg+' \\u00b7 '+list.length+' attempt(s)</span></div>'+list.map(renderAttempt).join('')+'</div>';",
   "  }).join('');",
   "  return card('Tasks &amp; transcripts',html);}",
+  "function ergRow(t){var flags=[];if(t.heavyPayload)flags.push('<span class=\"pill no\">heavy payload</span>');if(t.firstCalls>=2&&(t.firstCallSchemaErrorRate>=0.25||t.firstCallErrorRate>=0.25))flags.push('<span class=\"pill no\">unclear</span>');",
+  "  var ferr=Math.max(t.firstCallSchemaErrorRate,t.firstCallErrorRate);",
+  "  return '<tr><td>'+esc(t.name)+'</td><td>'+fmt(t.calls)+'</td><td>'+fmt(t.resultTokensMean)+'</td><td>'+fmt(t.resultTokensMax)+'</td><td>'+pct(t.resultTokenShare)+'</td><td>'+pct(ferr)+'</td><td>'+(flags.join(' ')||'<span class=muted>\\u2014</span>')+'</td></tr>';}",
+  "function renderErgonomics(e){if(!e||!e.perTool||!e.perTool.length)return '';",
+  "  var work='';",
+  "  if(e.heavyPayloadTools&&e.heavyPayloadTools.length)work+='<div class=row><span class=k title=\"Mean result tokens/call exceeds the heavy-payload threshold \\u2014 a candidate for pagination or field-selection.\">heavy payloads</span><span class=v>'+e.heavyPayloadTools.map(esc).join(', ')+'</span></div>';",
+  "  if(e.unclearTools&&e.unclearTools.length)work+='<div class=row><span class=k title=\"Frequently mis-called on first reach \\u2014 the description/schema is unclear to the model.\">unclear tools</span><span class=v>'+e.unclearTools.map(esc).join(', ')+'</span></div>';",
+  "  if(!work)work='<div class=muted>no design flags \\u2014 payloads lean, tools called correctly on first reach</div>';",
+  "  var th='<tr><th>tool</th><th>calls</th><th title=\"Mean estimated tokens the tool returns per call (result-payload efficiency).\">res tok/call</th><th>max</th><th title=\"This tool\\u2019s share of all tool-result tokens.\">res share</th><th title=\"First-reach error rate: schema-invalid or errored on the model\\u2019s first use of this tool.\">1st-call err</th><th>flags</th></tr>';",
+  "  return card('Server ergonomics <span class=muted style=\"font-weight:400;text-transform:none;letter-spacing:0\">\\u00b7 grades the server design, not the model</span>',row('first-call success',pct(e.firstCallSuccessRate))+work+'<table>'+th+e.perTool.map(ergRow).join('')+'</table>');}",
   "function renderAnalyze(d){var s=d.summary;var jm=d.judgeModel?(' \\u00b7 judge '+esc(d.judgeModel)):'';",
-  "  $('#main').innerHTML='<div class=head><h2>'+esc(s.label)+'</h2><div class=meta>analyze \\u00b7 model <b>'+esc(d.model||'?')+'</b>'+jm+' \\u00b7 auth='+esc(d.auth)+' \\u00b7 '+s.taskCount+' tasks \\u00d7 '+s.epochs+' epochs ('+s.failures+' failed)</div></div>'+pillars(s)+renderTasks(d.attempts);}",
+  "  $('#main').innerHTML='<div class=head><h2>'+esc(s.label)+'</h2><div class=meta>analyze \\u00b7 model <b>'+esc(d.model||'?')+'</b>'+jm+' \\u00b7 auth='+esc(d.auth)+' \\u00b7 '+s.taskCount+' tasks \\u00d7 '+s.epochs+' epochs ('+s.failures+' failed)</div></div>'+pillars(s)+renderErgonomics(s.ergonomics)+renderTasks(d.attempts);}",
   "var TH={'\\u0394':'Difference head minus base.','\\u00b1SE':'Paired standard error of the difference.','p':'Two-sided p-value of the paired t-test.','sig?':'Whether the delta is resolvable at the current n (p<0.05).','MDE':'Minimum effect detectable at the current n (80% power).','reqN':'Tasks needed to resolve the observed delta at 80% power.'};",
   "function th(h){var t=TH[h]?(' title=\"'+esc(TH[h])+'\"'):'';return '<th'+t+'>'+h+'</th>';}",
   "function cmpTable(rows){var h='<tr>'+['metric','base','head','\\u0394','%chg','\\u00b1SE','p','sig?','MDE','reqN'].map(th).join('')+'</tr>';",
@@ -128,6 +140,31 @@ const SCRIPT = [
   "function renderCompare(d){showComparison({baseLabel:(d.base&&d.base.label)||'base',headLabel:(d.head&&d.head.label)||'head',baseModel:d.model,headModel:d.model,meta:'compare run \\u00b7 model '+(d.model||'?')+' \\u00b7 auth='+d.auth+' \\u00b7 '+(d.matchedTasks?d.matchedTasks.length:0)+' matched tasks \\u00d7 '+d.epochs+' epochs',comparison:d.comparison,baseSummary:d.baseSummary,headSummary:d.headSummary});}",
   "function crossCompare(){var a=$('#cmpA').value,b=$('#cmpB').value;if(!a||!b){return;}if(a===b){$('#main').innerHTML='<div class=empty>Pick two different runs.</div>';return;}",
   "  fetch('/api/compare?a='+encodeURIComponent(a)+'&b='+encodeURIComponent(b)).then(function(r){return r.json();}).then(function(o){showComparison({baseLabel:o.baseLabel,headLabel:o.headLabel,baseModel:o.baseModel,headModel:o.headModel,meta:'cross-run compare \\u00b7 '+(o.matched?o.matched.length:0)+' matched tasks',comparison:o.comparison,baseSummary:o.baseSummary,headSummary:o.headSummary});}).catch(function(e){$('#main').innerHTML='<div class=empty>'+esc(e)+'</div>';});}",
+  "function mtxMetrics(){return [",
+  "  {k:'tokens/task (median)',g:function(s){return s.efficiency.tokensMedian;},lower:true,f:function(v){return fmt(v);}},",
+  "  {k:'tool calls',g:function(s){return s.efficiency.toolCallsMedian;},lower:true,f:function(v){return fmt(v,1);}},",
+  "  {k:'discovery RT',g:function(s){return s.efficiency.discoveryMean;},lower:true,f:function(v){return fmt(v,1);}},",
+  "  {k:'$/task',g:function(s){return s.cost.perTaskMean;},lower:true,f:usd},",
+  "  {k:'attributable',g:function(s){return s.bloat.attributableShareMean;},lower:false,f:pct},",
+  "  {k:'tool-def tokens',g:function(s){return s.bloat.toolDefTokensMean;},lower:true,f:function(v){return fmt(v);}},",
+  "  {k:'pass-rate',g:function(s){return s.correctness.scoreMean;},lower:false,f:pct},",
+  "  {k:'hallucinated/task',g:function(s){return s.reliability.hallucinatedRate;},lower:true,f:function(v){return fmt(v,2);}},",
+  "  {k:'tool errors/task',g:function(s){return s.reliability.toolErrorRate;},lower:true,f:function(v){return fmt(v,2);}}",
+  "];}",
+  "function matrixTable(cols){var ms=mtxMetrics();",
+  "  var head='<tr><th>metric</th>'+cols.map(function(c){return '<th>'+esc(c.model||c.label||c.runId)+'<div class=muted style=\"font-weight:400;font-size:11px\">'+esc(c.label||'')+(c.summary&&c.summary.estimated?' *est':'')+'</div></th>';}).join('')+'</tr>';",
+  "  var body=ms.map(function(m){var vals=cols.map(function(c){return c.summary?m.g(c.summary):null;});",
+  "    var nums=vals.filter(function(v){return v!=null;});",
+  "    var best=nums.length>1?(m.lower?Math.min.apply(null,nums):Math.max.apply(null,nums)):null;",
+  "    var d=DEFS[m.k];var tt=d?(' title=\"'+esc(d)+'\"'):'';",
+  "    var cells=vals.map(function(v){var b=best!=null&&v===best;return '<td class='+(b?'good':'')+'>'+(v==null?'<span class=muted>n/a</span>':m.f(v))+'</td>';}).join('');",
+  "    return '<tr><td'+tt+'>'+m.k+'</td>'+cells+'</tr>';}).join('');",
+  "  return '<table>'+head+body+'</table>';}",
+  "function showMatrix(cols){if(!cols||cols.length<2){$('#main').innerHTML='<div class=empty>Pick at least two runs for a matrix.</div>';return;}",
+  "  $('#main').innerHTML='<div class=head><h2>Model matrix</h2><div class=meta>'+cols.length+' runs side-by-side \\u00b7 best for cross-model robustness on the same task set</div></div>'+card('Metrics by run',matrixTable(cols))+'<p class=muted style=\"font-size:12px\">green = best in row \\u00b7 lower is better except attributable &amp; pass-rate \\u00b7 *est = estimated decomposition</p>';}",
+  "function buildMatrix(){var sel=$('#mtx');var ids=[];for(var i=0;i<sel.options.length;i++){if(sel.options[i].selected)ids.push(sel.options[i].value);}",
+  "  if(ids.length<2){$('#main').innerHTML='<div class=empty>Select at least two runs (Ctrl/Cmd-click).</div>';return;}",
+  "  fetch('/api/matrix?ids='+encodeURIComponent(ids.join(','))).then(function(r){return r.json();}).then(function(o){showMatrix(o.cols);}).catch(function(e){$('#main').innerHTML='<div class=empty>'+esc(e)+'</div>';});}",
   "function render(d){if(d.kind==='compare')renderCompare(d);else renderAnalyze(d);}",
   "function pick(el,id){var rs=document.querySelectorAll('.run');for(var i=0;i<rs.length;i++)rs[i].classList.remove('active');if(el)el.classList.add('active');",
   "  fetch('/api/runs/'+encodeURIComponent(id)).then(function(r){return r.json();}).then(render).catch(function(e){$('#main').innerHTML='<div class=empty>'+esc(e)+'</div>';});}",
@@ -137,7 +174,8 @@ const SCRIPT = [
   "  var rs=document.querySelectorAll('.run');for(var i=0;i<rs.length;i++){(function(el){el.onclick=function(){pick(el,el.getAttribute('data-id'));};})(rs[i]);}",
   "  var opts=runs.map(function(r){return '<option value=\"'+esc(r.runId)+'\">'+esc(r.kind)+': '+r.labels.map(esc).join(' \\u2192 ')+(r.model?' ['+esc(r.model)+']':'')+'</option>';}).join('');",
   "  $('#cmpA').innerHTML=opts;$('#cmpB').innerHTML=opts;if(runs[1]){$('#cmpB').selectedIndex=1;}",
-  "  $('#cmpBtn').onclick=crossCompare;",
+  "  $('#mtx').innerHTML=opts;",
+  "  $('#cmpBtn').onclick=crossCompare;$('#mtxBtn').onclick=buildMatrix;",
   "  pick(document.querySelector('.run'),runs[0].runId);",
   "}).catch(function(e){$('#runs').innerHTML='<div class=empty>'+esc(e)+'</div>';});",
 ].join("\n");
@@ -149,5 +187,6 @@ export const DASHBOARD_HTML = `<!doctype html><html lang=en><head><meta charset=
 <aside class=side><h1>mcp-dyno</h1><div class=tag>put your MCP on the dyno</div><div id=runs></div></aside>
 <main class=main>
 <div class=cmpbar><span class=lbl>Compare any two runs:</span><select id=cmpA></select><span class=lbl>vs</span><select id=cmpB></select><button id=cmpBtn>Compare</button></div>
-<div id=main><div class=empty>Select a run, or pick two above to compare.</div></div></main>
+<div class=cmpbar><span class=lbl>Model matrix (pick 2+, Ctrl/Cmd-click):</span><select id=mtx multiple size=4></select><button id=mtxBtn>Build matrix</button></div>
+<div id=main><div class=empty>Select a run, compare two, or build a model matrix.</div></div></main>
 </div><script>${SCRIPT}</script></body></html>`;

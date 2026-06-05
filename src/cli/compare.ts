@@ -5,12 +5,16 @@ import { loadConfig, specFromBlock } from "../config-file.js";
 import type { AuthMode, ServerSpec } from "../types.js";
 import { resolve } from "node:path";
 import { loadTasks } from "../workload/load.js";
+import { resolveCorpus } from "../workload/corpus.js";
 import { generateTasks, saveTasks } from "../workload/generate.js";
 import { runServer, listServerTools } from "../run/runner.js";
 import type { Task } from "../types.js";
 import { aggregateServer } from "../run/aggregate.js";
 import { printServerSummary, printCompare } from "../report/terminal.js";
 import { buildCompareRows } from "../run/compare.js";
+import { detectRegressions } from "../run/gate.js";
+import { regressionMarkdown } from "../report/markdown.js";
+import { writeFile } from "node:fs/promises";
 import { progressLogger } from "./analyze.js";
 import { makeRunId, writeRunArtifacts } from "../report/json.js";
 
@@ -48,11 +52,17 @@ export async function runCompare(opts: CompareOpts): Promise<void> {
   const model = opts.model ?? config.model ?? DEFAULTS.driverModel;
   const judgeModel = opts.judgeModel ?? config.judgeModel ?? DEFAULTS.judgeModel;
   const judge = Boolean(opts.judge || config.judge);
+  const corpusSel = opts.corpus as string | undefined;
   const tasksPath = (opts.tasks as string | undefined) ?? config.tasks;
 
   let tasks: Task[];
+  let tasksSource: string;
   if (tasksPath) {
     tasks = await loadTasks(tasksPath);
+    tasksSource = `from ${tasksPath}`;
+  } else if (corpusSel) {
+    tasks = await loadTasks(resolveCorpus(corpusSel));
+    tasksSource = `corpus ${corpusSel}`;
   } else {
     process.stdout.write(pc.dim("\n  no --tasks given — auto-generating a shared suite from the base server...\n"));
     const baseTools = await listServerTools(base);
@@ -60,12 +70,13 @@ export async function runCompare(opts: CompareOpts): Promise<void> {
     const genPath = resolve(process.cwd(), "dyno-tasks.generated.yaml");
     await saveTasks(genPath, tasks);
     process.stdout.write(pc.dim(`  generated ${tasks.length} tasks → ${genPath}\n`));
+    tasksSource = "auto-generated";
   }
 
   console.log(pc.bold("\nmcp-dyno compare"));
   console.log(`  base   ${base.target} ${pc.dim(`(${base.transport})`)}`);
   console.log(`  head   ${head.target} ${pc.dim(`(${head.transport})`)}`);
-  console.log(`  tasks  ${tasks.length} ${tasksPath ? `from ${tasksPath}` : "auto-generated"} ${pc.dim(`· model=${model} · auth=${auth} · epochs=${epochs}${judge ? " · judge on" : ""}`)}`);
+  console.log(`  tasks  ${tasks.length} ${tasksSource} ${pc.dim(`· model=${model} · auth=${auth} · epochs=${epochs}${judge ? " · judge on" : ""}`)}`);
 
   const common = {
     tasks,
@@ -119,4 +130,20 @@ export async function runCompare(opts: CompareOpts): Promise<void> {
     headAttempts: headRun.attempts,
   });
   console.log(pc.dim(`\n  artifacts → ${path}`));
+
+  // CI gate: fail only on resolvable, wrong-direction deltas (noise never fails the build).
+  if (opts.failOnRegression || opts.summaryMd) {
+    const regressions = detectRegressions(rows);
+    if (opts.summaryMd) {
+      await writeFile(resolve(process.cwd(), String(opts.summaryMd)), regressionMarkdown(base.label ?? "base", head.label ?? "head", rows, regressions), "utf8");
+      console.log(pc.dim(`  markdown summary → ${opts.summaryMd}`));
+    }
+    if (opts.failOnRegression) {
+      if (regressions.length) {
+        console.log(pc.red(`\n✖ ${regressions.length} resolvable regression(s): ${regressions.map((r) => r.metric).join(", ")}`));
+        process.exit(1);
+      }
+      console.log(pc.green("\n✓ no resolvable regressions"));
+    }
+  }
 }

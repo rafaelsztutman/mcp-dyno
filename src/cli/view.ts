@@ -79,6 +79,20 @@ async function compareRuns(outDir: string, a: string, b: string): Promise<string
   });
 }
 
+/** Load N runs' summaries for the model-matrix view (same task set, different models). */
+async function matrixRuns(outDir: string, idsCsv: string): Promise<string> {
+  const ids = idsCsv.split(",").map((s) => s.trim()).filter(Boolean);
+  const cols: Array<{ runId: string; label: string; model?: string; summary: ServerSummary }> = [];
+  for (const id of ids) {
+    const data = await loadRun(outDir, id).catch(() => null);
+    if (!data) continue;
+    const s = summaryOf(data);
+    if (!s) continue;
+    cols.push({ runId: id, label: s.label, model: data.model, summary: s });
+  }
+  return JSON.stringify({ cols });
+}
+
 export async function runView(opts: ViewOpts): Promise<void> {
   const outDir = opts.out ?? DEFAULTS.outDir;
   const port = Number(opts.port ?? 4000);
@@ -95,6 +109,11 @@ export async function runView(opts: ViewOpts): Promise<void> {
         const b = url.searchParams.get("b");
         if (!a || !b) return send(res, 400, "text/plain", "need ?a=<runId>&b=<runId>");
         return send(res, 200, "application/json", await compareRuns(outDir, a, b));
+      }
+      if (url.pathname === "/api/matrix") {
+        const ids = url.searchParams.get("ids");
+        if (!ids) return send(res, 400, "text/plain", "need ?ids=<runId>,<runId>,…");
+        return send(res, 200, "application/json", await matrixRuns(outDir, ids));
       }
       const m = url.pathname.match(/^\/api\/runs\/(.+)$/);
       if (m) {

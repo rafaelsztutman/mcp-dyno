@@ -38,6 +38,22 @@ export function printServerSummary(s: ServerSummary): void {
   console.log(pc.cyan("Correctness"));
   if (s.correctness.judged) console.log(`  pass-rate       ${pct(s.correctness.scoreMean ?? 0)}`);
   else console.log(pc.dim("  (judge disabled — correctness not scored)"));
+
+  const e = s.ergonomics;
+  if (e.perTool.length) {
+    console.log(pc.cyan("Server ergonomics") + pc.dim("  (server design, not the model)"));
+    const fcs = e.firstCallSuccessRate;
+    console.log(`  first-call ok   ${fcs === null ? "n/a" : pct(fcs)} ${pc.dim("of attempts started with a valid tool call")}`);
+    if (e.heavyPayloadTools.length) {
+      console.log(`  heavy payloads  ${pc.yellow(e.heavyPayloadTools.join(", "))} ${pc.dim(`(≥${n(e.payloadThresholdTokens)} tok/call — paginate?)`)}`);
+    }
+    if (e.unclearTools.length) {
+      console.log(`  unclear tools   ${pc.yellow(e.unclearTools.join(", "))} ${pc.dim("(often mis-called on first reach — clarify desc/schema)")}`);
+    }
+    if (!e.heavyPayloadTools.length && !e.unclearTools.length) {
+      console.log(pc.dim("  no design flags — payloads lean, tools called correctly on first reach"));
+    }
+  }
 }
 
 export interface CompareRow {

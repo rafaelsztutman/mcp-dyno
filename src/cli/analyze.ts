@@ -5,6 +5,7 @@ import { loadConfig, specFromBlock } from "../config-file.js";
 import type { AuthMode } from "../types.js";
 import { resolve } from "node:path";
 import { loadTasks } from "../workload/load.js";
+import { resolveCorpus } from "../workload/corpus.js";
 import { generateTasks, saveTasks } from "../workload/generate.js";
 import { runServer, listServerTools, type ProgressEvent } from "../run/runner.js";
 import type { Task, ToolDef } from "../types.js";
@@ -50,12 +51,19 @@ export async function runAnalyze(opts: AnalyzeOpts): Promise<void> {
   const model = opts.model ?? config.model ?? DEFAULTS.driverModel;
   const judgeModel = opts.judgeModel ?? config.judgeModel ?? DEFAULTS.judgeModel;
   const judge = Boolean(opts.judge || config.judge);
+  const corpusSel = opts.corpus as string | undefined;
   const tasksPath = (opts.tasks as string | undefined) ?? config.tasks;
 
   let tasks: Task[];
   let preTools: ToolDef[] | undefined;
+  let tasksSource: string;
   if (tasksPath) {
     tasks = await loadTasks(tasksPath);
+    tasksSource = `from ${tasksPath}`;
+  } else if (corpusSel) {
+    const file = resolveCorpus(corpusSel);
+    tasks = await loadTasks(file);
+    tasksSource = `corpus ${corpusSel}`;
   } else {
     process.stdout.write(pc.dim("\n  no --tasks given — auto-generating a starter suite from the tool surface...\n"));
     preTools = await listServerTools(server);
@@ -63,11 +71,12 @@ export async function runAnalyze(opts: AnalyzeOpts): Promise<void> {
     const genPath = resolve(process.cwd(), "dyno-tasks.generated.yaml");
     await saveTasks(genPath, tasks);
     process.stdout.write(pc.dim(`  generated ${tasks.length} tasks → ${genPath} (review/edit and re-run with --tasks)\n`));
+    tasksSource = "auto-generated";
   }
 
   console.log(pc.bold("\nmcp-dyno analyze"));
   console.log(`  server   ${server.target} ${pc.dim(`(${server.transport})`)}`);
-  console.log(`  tasks    ${tasks.length} ${tasksPath ? `from ${tasksPath}` : "auto-generated"}`);
+  console.log(`  tasks    ${tasks.length} ${tasksSource}`);
   console.log(`  model    ${model} ${pc.dim(`· auth=${auth} · epochs=${epochs}${judge ? " · judge on" : ""}`)}\n`);
 
   const { tools, attempts } = await runServer(
@@ -103,6 +112,8 @@ export async function runAnalyze(opts: AnalyzeOpts): Promise<void> {
     auth,
     epochs,
     toolCount: tools.length,
+    // Persisted so `dyno judge` can re-score this run's transcripts without re-driving.
+    tasks,
     summary,
     attempts,
   });
