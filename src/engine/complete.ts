@@ -2,6 +2,8 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { AuthMode } from "../types.js";
 import { runClaude } from "./claude-process.js";
 import { parseStreamJson } from "./stream-json.js";
+import { resolveModel } from "./providers.js";
+import { openaiChat } from "./openai-chat.js";
 
 /**
  * One-shot text completion with no tools/MCP, used by the judge and the task
@@ -19,6 +21,23 @@ export interface CompleteOpts {
 let apiClient: Anthropic | null = null;
 
 export async function completeText(opts: CompleteOpts): Promise<string> {
+  const resolved = resolveModel(opts.model);
+
+  // Non-Anthropic providers (incl. a cross-family judge) go over the OpenAI-compatible
+  // path regardless of --auth; there is no subscription/CLI equivalent for them.
+  if (resolved.provider.kind === "openai-compat") {
+    const resp = await openaiChat({
+      provider: resolved.provider,
+      model: resolved.model,
+      messages: [
+        { role: "system", content: opts.system },
+        { role: "user", content: opts.user },
+      ],
+      maxTokens: opts.maxTokens ?? 2048,
+    });
+    return resp.message.content ?? "";
+  }
+
   if (opts.auth === "cli") {
     const args = [
       "-p",
@@ -26,7 +45,7 @@ export async function completeText(opts: CompleteOpts): Promise<string> {
       "stream-json",
       "--verbose",
       "--model",
-      opts.model,
+      resolved.model,
       "--append-system-prompt",
       opts.system,
       "--strict-mcp-config",
@@ -41,7 +60,7 @@ export async function completeText(opts: CompleteOpts): Promise<string> {
     apiClient = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   }
   const resp = await apiClient.messages.create({
-    model: opts.model,
+    model: resolved.model,
     max_tokens: opts.maxTokens ?? 2048,
     system: opts.system,
     messages: [{ role: "user", content: opts.user }],

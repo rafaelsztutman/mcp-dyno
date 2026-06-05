@@ -30,6 +30,7 @@ function addUsage(acc: TokenUsage, u: Usage): void {
  */
 export class ApiLoopDriver implements ModelDriver {
   readonly kind = "api" as const;
+  readonly usesConnection = true;
   private client: Anthropic;
 
   constructor(opts: { apiKey?: string } = {}) {

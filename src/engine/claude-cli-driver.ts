@@ -8,6 +8,63 @@ function sanitizeName(name: string): string {
   return name.replace(/[^a-zA-Z0-9_-]/g, "-").replace(/^-+|-+$/g, "") || "sut";
 }
 
+/**
+ * Claude Code "bypass" built-ins: tools that let the model accomplish the task WITHOUT
+ * the server under test (e.g. computing with Bash, reading files, fetching the web). We
+ * --disallow these so the model is forced through the SUT's MCP tools. We deliberately do
+ * NOT disallow ToolSearch: in current Claude Code, MCP tools are surfaced through it, so
+ * blocking it blocks MCP access entirely.
+ */
+export const BYPASS_BUILTINS = [
+  "Bash",
+  "BashOutput",
+  "KillBash",
+  "KillShell",
+  "Read",
+  "Write",
+  "Edit",
+  "MultiEdit",
+  "NotebookEdit",
+  "Glob",
+  "Grep",
+  "Task",
+  "WebFetch",
+  "WebSearch",
+];
+
+/**
+ * The full set of Claude Code built-in / meta tools, used to FILTER them out of the recorded
+ * transcript so SUT metrics (tool-call count, hallucination, ergonomics) reflect only the
+ * server's own tools — not Claude Code scaffolding like ToolSearch. The API/OpenAI drivers
+ * never see these, so filtering keeps all drivers measuring the same thing.
+ */
+export const CLAUDE_CODE_BUILTINS = new Set([
+  ...BYPASS_BUILTINS,
+  "AskUserQuestion",
+  "CronCreate",
+  "CronDelete",
+  "CronList",
+  "EnterPlanMode",
+  "EnterWorktree",
+  "ExitPlanMode",
+  "ExitWorktree",
+  "Monitor",
+  "PushNotification",
+  "RemoteTrigger",
+  "ScheduleWakeup",
+  "Skill",
+  "SlashCommand",
+  "TaskCreate",
+  "TaskGet",
+  "TaskList",
+  "TaskOutput",
+  "TaskStop",
+  "TaskUpdate",
+  "TodoWrite",
+  "ToolSearch",
+  "Workflow",
+]);
+
 /** Build a Claude Code --mcp-config object that connects only to the server under test. */
 export function buildMcpConfig(serverName: string, spec: ServerSpec): { mcpServers: Record<string, unknown> } {
   let server: Record<string, unknown>;
@@ -29,6 +86,7 @@ export function buildMcpConfig(serverName: string, spec: ServerSpec): { mcpServe
  */
 export class ClaudeCliDriver implements ModelDriver {
   readonly kind = "cli" as const;
+  readonly usesConnection = false;
 
   constructor(private opts: { timeoutMs?: number; skipPermissions?: boolean } = {}) {}
 
@@ -54,6 +112,10 @@ export class ClaudeCliDriver implements ModelDriver {
       // stays intact. This is the safe default — no blanket permission bypass.
       "--allowedTools",
       `mcp__${serverName}__*`,
+      // Block "bypass" built-ins so the model can't accomplish the task outside the SUT
+      // (e.g. via Bash). ToolSearch is intentionally left enabled — MCP tools surface through it.
+      "--disallowedTools",
+      BYPASS_BUILTINS.join(","),
     ];
     if (this.opts.skipPermissions) args.push("--dangerously-skip-permissions");
 
@@ -68,7 +130,8 @@ export class ClaudeCliDriver implements ModelDriver {
       turns: parsed.turns.map((t, i) => ({
         userPrompt: t.userPrompt || turns[i] || "",
         assistantText: t.assistantText,
-        toolCalls: t.toolCalls,
+        // Drop Claude Code's own tool calls (ToolSearch, etc.) so metrics reflect only the SUT.
+        toolCalls: t.toolCalls.filter((c) => !CLAUDE_CODE_BUILTINS.has(c.name)),
         usage: t.usage,
       })),
       toolDefs: o.tools, // exact tool surface from a free listTools probe (runner supplies it)

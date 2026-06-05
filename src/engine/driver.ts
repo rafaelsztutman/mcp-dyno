@@ -23,6 +23,11 @@ export interface DriveOptions {
  */
 export interface ModelDriver {
   readonly kind: "api" | "cli";
+  /**
+   * True when drive() needs a live McpConnection (the API/OpenAI loops execute tool
+   * calls themselves). The CLI driver spawns its own MCP connection, so it is false.
+   */
+  readonly usesConnection: boolean;
   drive(opts: DriveOptions): Promise<Transcript>;
 }
 
