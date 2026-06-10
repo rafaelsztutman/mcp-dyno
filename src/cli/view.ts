@@ -55,8 +55,17 @@ function summaryOf(data: any): ServerSummary | null {
   return data?.summary ?? data?.headSummary ?? data?.baseSummary ?? null;
 }
 
+/** Run ids are flat directory names; reject anything that could escape outDir. */
+function safeRunId(id: string): string {
+  const dec = decodeURIComponent(id);
+  if (!dec || dec.includes("/") || dec.includes("\\") || dec.includes("..") || dec.includes("\0")) {
+    throw new Error(`invalid run id: ${id}`);
+  }
+  return dec;
+}
+
 async function loadRun(outDir: string, id: string): Promise<any> {
-  return JSON.parse(await readFile(join(outDir, id, "results.json"), "utf8"));
+  return JSON.parse(await readFile(join(outDir, safeRunId(id), "results.json"), "utf8"));
 }
 
 /** Compare any two saved runs by their stored per-task summaries (paired stats). */
@@ -117,7 +126,7 @@ export async function runView(opts: ViewOpts): Promise<void> {
       }
       const m = url.pathname.match(/^\/api\/runs\/(.+)$/);
       if (m) {
-        const file = join(outDir, decodeURIComponent(m[1]!), "results.json");
+        const file = join(outDir, safeRunId(m[1]!), "results.json");
         return send(res, 200, "application/json", await readFile(file, "utf8"));
       }
       send(res, 404, "text/plain", "not found");

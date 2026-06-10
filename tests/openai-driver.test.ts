@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { mapUsage, normalizeSchema, parseToolArgs } from "../src/engine/openai-chat.js";
+import { describe, it, expect, vi, afterEach } from "vitest";
+import { mapUsage, normalizeSchema, parseToolArgs, openaiChat } from "../src/engine/openai-chat.js";
 import { resolveModel, KNOWN_PROVIDERS } from "../src/engine/providers.js";
 
 describe("resolveModel", () => {
@@ -62,6 +62,41 @@ describe("normalizeSchema", () => {
   it("passes through a well-formed schema unchanged", () => {
     const schema = { type: "object", properties: { a: { type: "number" } }, required: ["a"] };
     expect(normalizeSchema(schema)).toBe(schema);
+  });
+});
+
+describe("openaiChat token-field fallback (regression for the 400-flip bug)", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  it("flips max_tokens→max_completion_tokens on a 400 and resends successfully", async () => {
+    process.env.GROQ_API_KEY = "test"; // groq defaults to max_tokens
+    const bodies: string[] = [];
+    const fetchMock = vi.fn(async (_url: string, init: { body: string }) => {
+      bodies.push(init.body);
+      if (bodies.length === 1) {
+        return { ok: false, status: 400, text: async () => "Unsupported parameter: 'max_tokens'. Use 'max_completion_tokens'." } as unknown as Response;
+      }
+      return {
+        ok: true,
+        json: async () => ({ choices: [{ message: { content: "hi" }, finish_reason: "stop" }], usage: { prompt_tokens: 1, completion_tokens: 1 } }),
+      } as unknown as Response;
+    });
+    vi.stubGlobal("fetch", fetchMock);
+
+    const provider = resolveModel("groq/llama").provider;
+    const resp = await openaiChat({ provider, model: "llama", messages: [{ role: "user", content: "x" }], maxTokens: 64 });
+
+    expect(resp.message.content).toBe("hi"); // resent and succeeded, not Error("undefined")
+    expect(bodies.length).toBe(2);
+    expect(JSON.parse(bodies[0]!)).toHaveProperty("max_tokens"); // first try
+    expect(JSON.parse(bodies[1]!)).toHaveProperty("max_completion_tokens"); // resent with flipped field
+  });
+
+  it("throws the real upstream error (not 'undefined') when a non-flippable 400 persists", async () => {
+    process.env.GROQ_API_KEY = "test";
+    vi.stubGlobal("fetch", vi.fn(async () => ({ ok: false, status: 400, text: async () => "bad request: model not found" }) as unknown as Response));
+    const provider = resolveModel("groq/llama").provider;
+    await expect(openaiChat({ provider, model: "llama", messages: [{ role: "user", content: "x" }], maxTokens: 64 })).rejects.toThrow(/model not found/);
   });
 });
 

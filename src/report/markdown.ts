@@ -37,14 +37,15 @@ export function regressionMarkdown(
   const lines = [
     `## ${head}`,
     ``,
-    `| metric | base | head | Δ | %chg | p | resolvable | |`,
-    `| --- | ---: | ---: | ---: | ---: | ---: | :---: | :---: |`,
+    `| metric | base | head | Δ | %chg | p | perm p | resolvable | |`,
+    `| --- | ---: | ---: | ---: | ---: | ---: | ---: | :---: | :---: |`,
     ...rows.map((r) => {
       const d = r.result.meanDiff;
       const pct = r.base ? (d / r.base) * 100 : 0;
       const isReg = regressed.has(r.metric);
       const flag = isReg ? "🔴" : r.result.resolvable ? (r.lowerIsBetter ? (d < 0 ? "🟢" : "") : d > 0 ? "🟢" : "") : "";
-      return `| ${r.metric} | ${num(r.base, 1)} | ${num(r.head, 1)} | ${d >= 0 ? "+" : ""}${num(d, 1)} | ${pct >= 0 ? "+" : ""}${pct.toFixed(0)}% | ${r.result.p.toFixed(3)} | ${r.result.resolvable ? "yes" : "no"} | ${flag} |`;
+      const permp = r.result.permutationP == null ? "—" : r.result.permutationP.toFixed(3);
+      return `| ${r.metric} | ${num(r.base, 1)} | ${num(r.head, 1)} | ${d >= 0 ? "+" : ""}${num(d, 1)} | ${pct >= 0 ? "+" : ""}${pct.toFixed(0)}% | ${r.result.p.toFixed(3)} | ${permp} | ${r.result.resolvable ? "yes" : "no"} | ${flag} |`;
     }),
     ``,
     `_Only resolvable, wrong-direction deltas (🔴) fail the build — noise is ignored._`,

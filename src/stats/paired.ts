@@ -181,7 +181,7 @@ export function pairedPermutationP(diffs: number[], opts: { samples?: number; se
   const n = diffs.length;
   if (n === 0) return 1;
   const obs = Math.abs(diffs.reduce((a, b) => a + b, 0));
-  const EXACT_MAX = 20;
+  const EXACT_MAX = 16; // 2^16 enumerations; sampled above to bound CPU cost
   const eps = 1e-9;
 
   if (n <= EXACT_MAX) {

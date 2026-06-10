@@ -104,7 +104,8 @@ export async function openaiChat(opts: {
     return JSON.stringify(body);
   };
 
-  let lastErr: unknown;
+  let lastErrText = "";
+  let flipTried = false;
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     let res: Response;
     try {
@@ -114,29 +115,30 @@ export async function openaiChat(opts: {
         body: buildBody(),
       });
     } catch (err) {
-      lastErr = err;
+      lastErrText = err instanceof Error ? err.message : String(err);
       if (attempt < maxRetries) {
         await sleep(backoffMs(attempt));
         continue;
       }
-      throw err;
+      throw err instanceof Error ? err : new Error(lastErrText);
     }
 
     if (!res.ok) {
       const text = await res.text().catch(() => "");
-      // Provider disagreed on the token-limit field name — flip it once and retry immediately.
-      if (res.status === 400 && /max_completion_tokens|max_tokens/.test(text)) {
-        const flipped = tokenField === "max_tokens" ? "max_completion_tokens" : "max_tokens";
-        if (flipped !== tokenField) {
-          tokenField = flipped;
-          continue;
-        }
+      lastErrText = `${opts.provider.id} chat error ${res.status}: ${text.slice(0, 300)}`;
+      // Provider disagreed on the token-limit field name — flip it ONCE and resend WITHOUT
+      // consuming a retry (so the fallback still fires on the final attempt).
+      if (res.status === 400 && !flipTried && /max_completion_tokens|max_tokens/.test(text)) {
+        flipTried = true;
+        tokenField = tokenField === "max_tokens" ? "max_completion_tokens" : "max_tokens";
+        attempt--; // re-run this iteration with the flipped field
+        continue;
       }
       if (RETRYABLE.has(res.status) && attempt < maxRetries) {
         await sleep(backoffMs(attempt));
         continue;
       }
-      throw new Error(`${opts.provider.id} chat error ${res.status}: ${text.slice(0, 300)}`);
+      throw new Error(lastErrText);
     }
 
     const json = (await res.json()) as {
@@ -155,5 +157,5 @@ export async function openaiChat(opts: {
       usage: json.usage ?? {},
     };
   }
-  throw lastErr instanceof Error ? lastErr : new Error(String(lastErr));
+  throw new Error(lastErrText || `${opts.provider.id} request failed`);
 }
