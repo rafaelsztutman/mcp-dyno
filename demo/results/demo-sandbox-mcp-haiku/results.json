@@ -5,130 +5,150 @@
     "label": "sandbox-mcp"
   },
   "model": "claude-haiku-4-5-20251001",
-  "judgeModel": "claude-sonnet-4-6",
+  "judgeModel": "claude-opus-4-8",
   "auth": "cli",
   "epochs": 2,
   "summary": {
-    "label": "sandbox-mcp @haiku",
+    "label": "sandbox-mcp",
     "epochs": 2,
-    "taskCount": 3,
-    "attempts": 6,
-    "failures": 2,
+    "taskCount": 2,
+    "attempts": 4,
+    "failures": 0,
     "estimated": true,
     "efficiency": {
-      "tokensMedian": 10534,
-      "tokensP90": 12166,
-      "tokensIqr": 3935.75,
-      "toolCallsMedian": 2,
-      "discoveryMean": 1,
-      "refetchMean": 0.5,
-      "latencyP50": 12690,
-      "latencyP95": 21856.1
+      "tokensMedian": 11790,
+      "tokensP90": 13676.2,
+      "tokensIqr": 1714,
+      "toolCallsMedian": 1.5,
+      "discoveryMean": 0.25,
+      "refetchMean": 0.25,
+      "latencyP50": 13611.5,
+      "latencyP95": 18899.549999999996
     },
     "cost": {
-      "perTaskMean": 0.029821100000000003,
+      "perTaskMean": 0.025182287500000004,
       "source": "reported"
     },
     "bloat": {
       "shares": {
-        "toolDef": 0.4430603856661597,
-        "toolArg": 0.13285505887983814,
-        "toolResult": 0.3584976112528461,
-        "reasoning": 0.06558694420115609
+        "toolDef": 0.663624159345475,
+        "toolArg": 0.08412554841786654,
+        "toolResult": 0.15140031261153036,
+        "reasoning": 0.10084997962512807
       },
       "toolDefTokensMean": 1214.25,
-      "attributableShareMean": 0.4050632019474482,
-      "floorTokensMean": 6249.875
+      "attributableShareMean": 0.15691706353684828,
+      "floorTokensMean": 10149
     },
     "reliability": {
       "hallucinatedRate": 0,
       "schemaViolationRate": 0,
-      "toolErrorRate": 0.5,
+      "toolErrorRate": 0.25,
       "recoveryRate": 1
     },
     "correctness": {
-      "scoreMean": 0.85,
+      "scoreMean": 1,
       "judged": true
+    },
+    "ergonomics": {
+      "perTool": [
+        {
+          "name": "execute_code",
+          "calls": 5,
+          "resultTokensMean": 186.75,
+          "resultTokensMax": 386.75,
+          "resultTokenShare": 0.7761845386533666,
+          "heavyPayload": false,
+          "firstCalls": 4,
+          "firstCallSchemaErrorRate": 0,
+          "firstCallErrorRate": 0.25
+        },
+        {
+          "name": "search_docs",
+          "calls": 1,
+          "resultTokensMean": 269.25,
+          "resultTokensMax": 269.25,
+          "resultTokenShare": 0.2238154613466334,
+          "heavyPayload": false,
+          "firstCalls": 1,
+          "firstCallSchemaErrorRate": 0,
+          "firstCallErrorRate": 0
+        }
+      ],
+      "firstCallSuccessRate": 0.75,
+      "heavyPayloadTools": [],
+      "unclearTools": [
+        "execute_code"
+      ],
+      "payloadThresholdTokens": 1500
     },
     "perTask": [
       {
-        "taskId": "01-recent-sends",
+        "taskId": "list-segments",
         "n": 2,
         "failures": 0,
-        "tokensMean": 10534,
-        "toolCallsMean": 2,
-        "discoveryMean": 1,
+        "tokensMean": 12224,
+        "toolCallsMean": 1,
+        "discoveryMean": 0,
         "refetchMean": 0,
-        "latencyMsMean": 12086.5,
-        "costMean": 0.028117975000000003,
+        "latencyMsMean": 11615.5,
+        "costMean": 0.0240893,
         "scoreMean": 1
       },
       {
-        "taskId": "02-top-flow-revenue",
+        "taskId": "recent-campaigns",
         "n": 2,
         "failures": 0,
-        "tokensMean": 7768.5,
-        "toolCallsMean": 3,
-        "discoveryMean": 1,
-        "refetchMean": 1,
-        "latencyMsMean": 17803,
-        "costMean": 0.031524225,
-        "scoreMean": 0.7
-      },
-      {
-        "taskId": "03-largest-segment",
-        "n": 0,
-        "failures": 2,
-        "tokensMean": 0,
-        "toolCallsMean": 0,
-        "discoveryMean": 0,
-        "refetchMean": 0,
-        "latencyMsMean": 0,
-        "costMean": null,
-        "scoreMean": null
+        "tokensMean": 11790,
+        "toolCallsMean": 2,
+        "discoveryMean": 0.5,
+        "refetchMean": 0.5,
+        "latencyMsMean": 17134.5,
+        "costMean": 0.026275275,
+        "scoreMean": 1
       }
     ]
   },
   "attempts": [
     {
-      "taskId": "01-recent-sends",
+      "taskId": "list-segments",
       "epoch": 1,
       "signals": {
-        "totalTokens": 9455,
-        "cacheReadTokens": 110069,
-        "durationMs": 11009,
-        "toolCalls": 2,
-        "discoveryRoundtrips": 1,
+        "totalTokens": 10158,
+        "cacheReadTokens": 48663,
+        "durationMs": 10621,
+        "toolCalls": 1,
+        "discoveryRoundtrips": 0,
         "refetchRoundtrips": 0,
         "turns": 1
       },
       "decomposition": {
         "bytes": {
           "toolDef": 4857,
-          "toolArg": 504,
-          "toolResult": 2058,
-          "reasoning": 606,
-          "total": 8025
+          "toolArg": 470,
+          "toolResult": 628,
+          "reasoning": 728,
+          "total": 6683
         },
         "shares": {
-          "toolDef": 0.6052336448598131,
-          "toolArg": 0.06280373831775701,
-          "toolResult": 0.25644859813084114,
-          "reasoning": 0.07551401869158879
+          "toolDef": 0.7267694149334132,
+          "toolArg": 0.0703276971420021,
+          "toolResult": 0.09396977405356875,
+          "reasoning": 0.10893311387101601
         },
         "tokensEst": {
           "toolDef": 1214.25,
-          "toolArg": 126,
-          "toolResult": 514.5,
-          "reasoning": 151.5
+          "toolArg": 117.5,
+          "toolResult": 157,
+          "reasoning": 182
         },
         "usage": {
-          "billableTotal": 9455,
-          "cacheReadTokens": 110069,
-          "cacheReadShare": 0.9208945483752217,
-          "attributedTokens": 2006.25,
-          "floorTokens": 7448.75,
-          "attributableShare": 0.2121893178212586
+          "billableTotal": 10158,
+          "cacheReadTokens": 48663,
+          "cacheReadShare": 0.8273065741826898,
+          "attributedTokens": 1670.75,
+          "floorTokens": 8487.25,
+          "attributableShare": 0.16447627485725536
         },
         "estimated": true
       },
@@ -139,61 +159,35 @@
         "recoveredFromError": false
       },
       "score": 1,
-      "costUsd": 0.026745400000000003,
+      "costUsd": 0.0214188,
       "judge": [
         {
-          "criterion": "Lists 5 email campaigns",
+          "criterion": "Uses a tool to query lists or segments",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
         },
         {
-          "criterion": "Ordered newest-first by send time",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "Each campaign has a name",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "Scoped to email (not SMS/push)",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "No fabricated campaign names",
+          "criterion": "Reports a concrete number grounded in the tool's response",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
         }
       ],
       "log": {
-        "finalText": "Your 5 most recent email campaigns: 1) Spring Launch 2026, 2) Weekend Flash Sale, 3) New Arrivals Drop, 4) Member Rewards, 5) Restock Alert.",
+        "finalText": "There are 14 segments and 6 lists in the connected account (20 audiences total).",
         "turns": [
           {
-            "userPrompt": "Show me my 5 most recently sent email campaigns on Marketwave.",
-            "assistantText": "Your 5 most recent email campaigns: 1) Spring Launch 2026, 2) Weekend Flash Sale, 3) New Arrivals Drop, 4) Member Rewards, 5) Restock Alert.",
+            "userPrompt": "How many audience lists or segments exist in the connected Marketwave account?",
+            "assistantText": "There are 14 segments and 6 lists in the connected account (20 audiences total).",
             "toolCalls": [
               {
-                "name": "get_campaigns",
+                "name": "get_segments",
                 "args": {
                   "fields": [
                     "name"
                   ],
                   "limit": 5
                 },
-                "result": "{\"campaigns\":[{\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
-                "isError": false
-              },
-              {
-                "name": "get_campaigns",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"campaigns\":[{\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
+                "result": "{\"data\":[{\"type\":\"segment\",\"name\":\"Engaged Subscribers\",\"profile_count\":48210},{\"type\":\"segment\",\"name\":\"VIP Customers\",\"profile_count\":3120}]}",
                 "isError": false
               }
             ]
@@ -203,44 +197,44 @@
       "failed": false
     },
     {
-      "taskId": "01-recent-sends",
+      "taskId": "list-segments",
       "epoch": 2,
       "signals": {
-        "totalTokens": 11613,
-        "cacheReadTokens": 112158,
-        "durationMs": 13164,
-        "toolCalls": 2,
-        "discoveryRoundtrips": 1,
+        "totalTokens": 14290,
+        "cacheReadTokens": 52823,
+        "durationMs": 12610,
+        "toolCalls": 1,
+        "discoveryRoundtrips": 0,
         "refetchRoundtrips": 0,
         "turns": 1
       },
       "decomposition": {
         "bytes": {
           "toolDef": 4857,
-          "toolArg": 535,
-          "toolResult": 8901,
-          "reasoning": 797,
-          "total": 15090
+          "toolArg": 447,
+          "toolResult": 628,
+          "reasoning": 709,
+          "total": 6641
         },
         "shares": {
-          "toolDef": 0.32186878727634194,
-          "toolArg": 0.03545394300861498,
-          "toolResult": 0.5898608349900596,
-          "reasoning": 0.05281643472498343
+          "toolDef": 0.7313657581689504,
+          "toolArg": 0.06730914018973046,
+          "toolResult": 0.09456407167595242,
+          "reasoning": 0.10676102996536666
         },
         "tokensEst": {
           "toolDef": 1214.25,
-          "toolArg": 133.75,
-          "toolResult": 2225.25,
-          "reasoning": 199.25
+          "toolArg": 111.75,
+          "toolResult": 157,
+          "reasoning": 177.25
         },
         "usage": {
-          "billableTotal": 11613,
-          "cacheReadTokens": 112158,
-          "cacheReadShare": 0.9061734978306711,
-          "attributedTokens": 3772.5,
-          "floorTokens": 7840.5,
-          "attributableShare": 0.32485145957117023
+          "billableTotal": 14290,
+          "cacheReadTokens": 52823,
+          "cacheReadShare": 0.7870755293311281,
+          "attributedTokens": 1660.25,
+          "floorTokens": 12629.75,
+          "attributableShare": 0.11618264520643806
         },
         "estimated": true
       },
@@ -251,61 +245,35 @@
         "recoveredFromError": false
       },
       "score": 1,
-      "costUsd": 0.029490550000000004,
+      "costUsd": 0.0267598,
       "judge": [
         {
-          "criterion": "Lists 5 email campaigns",
+          "criterion": "Uses a tool to query lists or segments",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
         },
         {
-          "criterion": "Ordered newest-first by send time",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "Each campaign has a name",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "Scoped to email (not SMS/push)",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "No fabricated campaign names",
+          "criterion": "Reports a concrete number grounded in the tool's response",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
         }
       ],
       "log": {
-        "finalText": "Your 5 most recent email campaigns: 1) Spring Launch 2026, 2) Weekend Flash Sale, 3) New Arrivals Drop, 4) Member Rewards, 5) Restock Alert.",
+        "finalText": "There are 14 segments and 6 lists in the connected account (20 audiences total).",
         "turns": [
           {
-            "userPrompt": "Show me my 5 most recently sent email campaigns on Marketwave.",
-            "assistantText": "Your 5 most recent email campaigns: 1) Spring Launch 2026, 2) Weekend Flash Sale, 3) New Arrivals Drop, 4) Member Rewards, 5) Restock Alert.",
+            "userPrompt": "How many audience lists or segments exist in the connected Marketwave account?",
+            "assistantText": "There are 14 segments and 6 lists in the connected account (20 audiences total).",
             "toolCalls": [
               {
-                "name": "get_campaigns",
+                "name": "get_segments",
                 "args": {
                   "fields": [
                     "name"
                   ],
                   "limit": 5
                 },
-                "result": "{\"campaigns\":[{\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
-                "isError": false
-              },
-              {
-                "name": "get_campaigns",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"campaigns\":[{\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
+                "result": "{\"data\":[{\"type\":\"segment\",\"name\":\"Engaged Subscribers\",\"profile_count\":48210},{\"type\":\"segment\",\"name\":\"VIP Customers\",\"profile_count\":3120}]}",
                 "isError": false
               }
             ]
@@ -315,131 +283,191 @@
       "failed": false
     },
     {
-      "taskId": "02-top-flow-revenue",
+      "taskId": "recent-campaigns",
       "epoch": 1,
       "signals": {
-        "totalTokens": 12403,
-        "cacheReadTokens": 191809,
-        "durationMs": 23390,
-        "toolCalls": 4,
+        "totalTokens": 12244,
+        "cacheReadTokens": 70331,
+        "durationMs": 14613,
+        "toolCalls": 2,
         "discoveryRoundtrips": 1,
-        "refetchRoundtrips": 2,
+        "refetchRoundtrips": 0,
         "turns": 1
       },
       "decomposition": {
         "bytes": {
           "toolDef": 4857,
-          "toolArg": 4166,
-          "toolResult": 2987,
-          "reasoning": 1007,
-          "total": 13017
+          "toolArg": 529,
+          "toolResult": 2624,
+          "reasoning": 1014,
+          "total": 9024
         },
         "shares": {
-          "toolDef": 0.3731274487209034,
-          "toolArg": 0.32004302066528384,
-          "toolResult": 0.22946915571944382,
-          "reasoning": 0.07736037489436891
+          "toolDef": 0.5382313829787234,
+          "toolArg": 0.05862145390070922,
+          "toolResult": 0.2907801418439716,
+          "reasoning": 0.11236702127659574
         },
         "tokensEst": {
           "toolDef": 1214.25,
-          "toolArg": 1041.5,
-          "toolResult": 746.75,
-          "reasoning": 251.75
+          "toolArg": 132.25,
+          "toolResult": 656,
+          "reasoning": 253.5
         },
         "usage": {
-          "billableTotal": 12403,
-          "cacheReadTokens": 191809,
-          "cacheReadShare": 0.9392640980941375,
-          "attributedTokens": 3254.25,
-          "floorTokens": 9148.75,
-          "attributableShare": 0.2623760380553092
+          "billableTotal": 12244,
+          "cacheReadTokens": 70331,
+          "cacheReadShare": 0.8517226763548289,
+          "attributedTokens": 2256,
+          "floorTokens": 9988,
+          "attributableShare": 0.18425351192420777
         },
         "estimated": true
       },
       "structural": {
         "hallucinatedToolCalls": 0,
         "schemaViolations": 0,
-        "toolErrors": 2,
+        "toolErrors": 0,
+        "recoveredFromError": false
+      },
+      "score": 1,
+      "costUsd": 0.02713985,
+      "judge": [
+        {
+          "criterion": "Uses a tool to fetch real campaign data",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        },
+        {
+          "criterion": "Reports an actual count and real campaign names grounded in the data",
+          "verdict": "PASS",
+          "reason": "Satisfied, grounded in the returned data."
+        }
+      ],
+      "log": {
+        "finalText": "I can see 10 campaigns. The most recent are: Spring Launch 2026, Weekend Flash Sale, New Arrivals Drop, Member Rewards, and Restock Alert.",
+        "turns": [
+          {
+            "userPrompt": "Show me my most recently sent email campaigns on Marketwave, and how many there are.",
+            "assistantText": "I can see 10 campaigns. The most recent are: Spring Launch 2026, Weekend Flash Sale, New Arrivals Drop, Member Rewards, and Restock Alert.",
+            "toolCalls": [
+              {
+                "name": "get_campaigns",
+                "args": {
+                  "fields": [
+                    "name"
+                  ],
+                  "limit": 5
+                },
+                "result": "{\"ok\":false,\"error\":\"transient error; retrying\"}",
+                "isError": true
+              },
+              {
+                "name": "get_campaigns",
+                "args": {
+                  "fields": [
+                    "name"
+                  ],
+                  "limit": 5
+                },
+                "result": "{\"data\":[{\"type\":\"campaign\",\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"type\":\"campaign\",\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"type\":\"campaign\",\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
+                "isError": false
+              }
+            ]
+          }
+        ]
+      },
+      "failed": false
+    },
+    {
+      "taskId": "recent-campaigns",
+      "epoch": 2,
+      "signals": {
+        "totalTokens": 11336,
+        "cacheReadTokens": 70122,
+        "durationMs": 19656,
+        "toolCalls": 2,
+        "discoveryRoundtrips": 0,
+        "refetchRoundtrips": 1,
+        "turns": 1
+      },
+      "decomposition": {
+        "bytes": {
+          "toolDef": 4857,
+          "toolArg": 1035,
+          "toolResult": 932,
+          "reasoning": 556,
+          "total": 7380
+        },
+        "shares": {
+          "toolDef": 0.658130081300813,
+          "toolArg": 0.1402439024390244,
+          "toolResult": 0.12628726287262873,
+          "reasoning": 0.07533875338753387
+        },
+        "tokensEst": {
+          "toolDef": 1214.25,
+          "toolArg": 258.75,
+          "toolResult": 233,
+          "reasoning": 139
+        },
+        "usage": {
+          "billableTotal": 11336,
+          "cacheReadTokens": 70122,
+          "cacheReadShare": 0.8608362591765082,
+          "attributedTokens": 1845,
+          "floorTokens": 9491,
+          "attributableShare": 0.1627558221594919
+        },
+        "estimated": true
+      },
+      "structural": {
+        "hallucinatedToolCalls": 0,
+        "schemaViolations": 0,
+        "toolErrors": 1,
         "recoveredFromError": true
       },
-      "score": 0.8,
-      "costUsd": 0.04368915000000001,
+      "score": 1,
+      "costUsd": 0.0254107,
       "judge": [
         {
-          "criterion": "Names a single specific flow",
+          "criterion": "Uses a tool to fetch real campaign data",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
         },
         {
-          "criterion": "Reports a concrete revenue figure",
+          "criterion": "Reports an actual count and real campaign names grounded in the data",
           "verdict": "PASS",
           "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "About flows (not campaigns)",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "No fabricated flow names",
-          "verdict": "PARTIAL",
-          "reason": "Partially satisfied."
-        },
-        {
-          "criterion": "No fabricated flow names",
-          "verdict": "PARTIAL",
-          "reason": "Partially satisfied."
         }
       ],
       "log": {
-        "finalText": "Your top revenue-driving flow is the Welcome Series at $12,480.50, ahead of Abandoned Cart ($9,120.00).",
+        "finalText": "I can see 10 campaigns. The most recent are: Spring Launch 2026, Weekend Flash Sale, New Arrivals Drop, Member Rewards, and Restock Alert.",
         "turns": [
           {
-            "userPrompt": "Which of my Marketwave automation flows has driven the most revenue?",
-            "assistantText": "Your top revenue-driving flow is the Welcome Series at $12,480.50, ahead of Abandoned Cart ($9,120.00).",
+            "userPrompt": "Show me my most recently sent email campaigns on Marketwave, and how many there are.",
+            "assistantText": "I can see 10 campaigns. The most recent are: Spring Launch 2026, Weekend Flash Sale, New Arrivals Drop, Member Rewards, and Restock Alert.",
             "toolCalls": [
               {
-                "name": "get_flow_values",
+                "name": "get_campaigns",
                 "args": {
                   "fields": [
                     "name"
                   ],
                   "limit": 5
                 },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
-                "isError": false
+                "result": "{\"ok\":false,\"error\":\"transient error; retrying\"}",
+                "isError": true
               },
               {
-                "name": "get_flow_values",
+                "name": "get_campaigns",
                 "args": {
                   "fields": [
                     "name"
                   ],
                   "limit": 5
                 },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
-                "isError": false
-              },
-              {
-                "name": "get_flow_values",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
-                "isError": false
-              },
-              {
-                "name": "get_flow_values",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
+                "result": "{\"data\":[{\"type\":\"campaign\",\"name\":\"Spring Launch 2026\",\"sent_at\":\"2026-05-30\",\"channel\":\"email\"},{\"type\":\"campaign\",\"name\":\"Weekend Flash Sale\",\"sent_at\":\"2026-05-28\",\"channel\":\"email\"},{\"type\":\"campaign\",\"name\":\"New Arrivals Drop\",\"sent_at\":\"2026-05-25\",\"channel\":\"email\"}]}",
                 "isError": false
               }
             ]
@@ -447,224 +475,6 @@
         ]
       },
       "failed": false
-    },
-    {
-      "taskId": "02-top-flow-revenue",
-      "epoch": 2,
-      "signals": {
-        "totalTokens": 3134,
-        "cacheReadTokens": 116983,
-        "durationMs": 12216,
-        "toolCalls": 2,
-        "discoveryRoundtrips": 1,
-        "refetchRoundtrips": 0,
-        "turns": 1
-      },
-      "decomposition": {
-        "bytes": {
-          "toolDef": 4857,
-          "toolArg": 1164,
-          "toolResult": 3686,
-          "reasoning": 583,
-          "total": 10290
-        },
-        "shares": {
-          "toolDef": 0.4720116618075802,
-          "toolArg": 0.1131195335276968,
-          "toolResult": 0.35821185617103984,
-          "reasoning": 0.05665694849368319
-        },
-        "tokensEst": {
-          "toolDef": 1214.25,
-          "toolArg": 291,
-          "toolResult": 921.5,
-          "reasoning": 145.75
-        },
-        "usage": {
-          "billableTotal": 3134,
-          "cacheReadTokens": 116983,
-          "cacheReadShare": 0.97390877228036,
-          "attributedTokens": 2572.5,
-          "floorTokens": 561.5,
-          "attributableShare": 0.8208359923420548
-        },
-        "estimated": true
-      },
-      "structural": {
-        "hallucinatedToolCalls": 0,
-        "schemaViolations": 0,
-        "toolErrors": 0,
-        "recoveredFromError": false
-      },
-      "score": 0.6,
-      "costUsd": 0.019359300000000003,
-      "judge": [
-        {
-          "criterion": "Names a single specific flow",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "Reports a concrete revenue figure",
-          "verdict": "PASS",
-          "reason": "Satisfied, grounded in the returned data."
-        },
-        {
-          "criterion": "About flows (not campaigns)",
-          "verdict": "PARTIAL",
-          "reason": "Partially satisfied."
-        },
-        {
-          "criterion": "No fabricated flow names",
-          "verdict": "FAIL",
-          "reason": "Not satisfied (e.g. no data retrieved)."
-        },
-        {
-          "criterion": "No fabricated flow names",
-          "verdict": "PARTIAL",
-          "reason": "Partially satisfied."
-        }
-      ],
-      "log": {
-        "finalText": "Your top revenue-driving flow is the Welcome Series at $12,480.50, ahead of Abandoned Cart ($9,120.00).",
-        "turns": [
-          {
-            "userPrompt": "Which of my Marketwave automation flows has driven the most revenue?",
-            "assistantText": "Your top revenue-driving flow is the Welcome Series at $12,480.50, ahead of Abandoned Cart ($9,120.00).",
-            "toolCalls": [
-              {
-                "name": "get_flow_values",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
-                "isError": false
-              },
-              {
-                "name": "get_flow_values",
-                "args": {
-                  "fields": [
-                    "name"
-                  ],
-                  "limit": 5
-                },
-                "result": "{\"flows\":[{\"name\":\"Welcome Series\",\"revenue\":12480.5},{\"name\":\"Abandoned Cart\",\"revenue\":9120}]}",
-                "isError": false
-              }
-            ]
-          }
-        ]
-      },
-      "failed": false
-    },
-    {
-      "taskId": "03-largest-segment",
-      "epoch": 1,
-      "signals": {
-        "totalTokens": 0,
-        "cacheReadTokens": 0,
-        "durationMs": 0,
-        "toolCalls": 0,
-        "discoveryRoundtrips": 0,
-        "refetchRoundtrips": 0,
-        "turns": 0
-      },
-      "decomposition": {
-        "bytes": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0,
-          "total": 0
-        },
-        "shares": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0
-        },
-        "tokensEst": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0
-        },
-        "usage": {
-          "billableTotal": 0,
-          "cacheReadTokens": 0,
-          "cacheReadShare": 0,
-          "attributedTokens": 0,
-          "floorTokens": 0,
-          "attributableShare": 0
-        },
-        "estimated": true
-      },
-      "structural": {
-        "hallucinatedToolCalls": 0,
-        "schemaViolations": 0,
-        "toolErrors": 0,
-        "recoveredFromError": false
-      },
-      "score": null,
-      "judge": [],
-      "failed": true,
-      "error": "run error (demo)"
-    },
-    {
-      "taskId": "03-largest-segment",
-      "epoch": 2,
-      "signals": {
-        "totalTokens": 0,
-        "cacheReadTokens": 0,
-        "durationMs": 0,
-        "toolCalls": 0,
-        "discoveryRoundtrips": 0,
-        "refetchRoundtrips": 0,
-        "turns": 0
-      },
-      "decomposition": {
-        "bytes": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0,
-          "total": 0
-        },
-        "shares": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0
-        },
-        "tokensEst": {
-          "toolDef": 0,
-          "toolArg": 0,
-          "toolResult": 0,
-          "reasoning": 0
-        },
-        "usage": {
-          "billableTotal": 0,
-          "cacheReadTokens": 0,
-          "cacheReadShare": 0,
-          "attributedTokens": 0,
-          "floorTokens": 0,
-          "attributableShare": 0
-        },
-        "estimated": true
-      },
-      "structural": {
-        "hallucinatedToolCalls": 0,
-        "schemaViolations": 0,
-        "toolErrors": 0,
-        "recoveredFromError": false
-      },
-      "score": null,
-      "judge": [],
-      "failed": true,
-      "error": "run error (demo)"
     }
   ]
 }
