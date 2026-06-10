@@ -1,6 +1,6 @@
 {
   "name": "mcp-dyno",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Put your MCP server on the dyno — holistic, LLM-driven analysis of efficiency, cost, context-bloat, correctness, and reliability, with rigorous before/after error bars.",
   "keywords": [
     "mcp",
