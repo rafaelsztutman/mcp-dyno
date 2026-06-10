@@ -38,10 +38,11 @@ export function progressLogger(): (e: ProgressEvent) => void {
 
 export async function runAnalyze(opts: AnalyzeOpts): Promise<void> {
   const config = await loadConfig(opts.config as string | undefined);
+  const runLabel = (opts.label as string | undefined) ?? "subject";
   const server = opts.server
-    ? buildServerSpec(opts.server, opts, "subject")
+    ? buildServerSpec(opts.server, opts, runLabel)
     : config.server
-      ? specFromBlock(config.server, "subject")
+      ? specFromBlock(config.server, runLabel)
       : (() => {
           throw new Error("no server given — pass --server or set `server` in dyno.config.json");
         })();

@@ -39,7 +39,8 @@ transportOption(
   program
     .command("analyze")
     .description("Run a holistic analysis of a single MCP server.")
-    .option("--server <target>", "stdio command or sse/http URL (or set in --config)"),
+    .option("--server <target>", "stdio command or sse/http URL (or set in --config)")
+    .option("--label <name>", "label for this server/run (shown in the dashboard & matrix)"),
 ).action(async (opts) => {
   await runAnalyze(opts).catch(fail);
 });
