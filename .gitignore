@@ -7,15 +7,17 @@ dist/
 
 # dyno run artifacts + generated workloads (may contain server response data)
 .dyno/
+.dyno-*/
 dyno-results/
 *.dyno.json
 dyno-tasks.generated.yaml
+report-tasks/
 
 # npm pack output
 *.tgz
 
 # machine-specific local integration scripts (read ~/.claude.json, hardcoded paths)
-tests/live-*.ts
+tests/live-*
 
 # editor / OS
 .DS_Store

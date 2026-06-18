@@ -79,7 +79,7 @@ Pick the driver model with `--model`. A bare id (e.g. `claude-sonnet-4-6`) is Cl
 
 ```bash
 npx mcp-dyno analyze --server "…" --model openai/gpt-4o-mini      # needs OPENAI_API_KEY
-npx mcp-dyno analyze --server "…" --model google/gemini-2.0-flash # needs GEMINI_API_KEY
+npx mcp-dyno analyze --server "…" --model google/gemini-2.5-flash # needs GEMINI_API_KEY
 npx mcp-dyno analyze --server "…" --model openrouter/meta-llama/llama-3.1-70b-instruct
 ```
 

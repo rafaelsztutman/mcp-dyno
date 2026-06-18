@@ -15,7 +15,7 @@ const program = new Command();
 program
   .name("dyno")
   .description("Put your MCP server on the dyno — holistic, LLM-driven MCP analysis.")
-  .version("0.2.0");
+  .version("0.2.1");
 
 function transportOption(cmd: Command): Command {
   return cmd

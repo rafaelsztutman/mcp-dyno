@@ -36,8 +36,9 @@ export const PRICE_TABLE: Record<string, ModelPrice> = {
   "gpt-4.1": { input: 2, output: 8, cacheWrite: 2, cacheRead: 0.5 },
   "gpt-4.1-mini": { input: 0.4, output: 1.6, cacheWrite: 0.4, cacheRead: 0.1 },
   // Google Gemini (approximate)
+  "gemini-2.5-flash": { input: 0.3, output: 2.5, cacheWrite: 0.3, cacheRead: 0.075 },
+  "gemini-2.5-pro": { input: 1.25, output: 10, cacheWrite: 1.25, cacheRead: 0.3125 },
   "gemini-2.0-flash": { input: 0.1, output: 0.4, cacheWrite: 0.1, cacheRead: 0.025 },
-  "gemini-1.5-pro": { input: 1.25, output: 5, cacheWrite: 1.25, cacheRead: 0.3125 },
 };
 
 export function priceFor(model: string, overrides?: Record<string, ModelPrice>): ModelPrice | undefined {

@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.2.1
+
+Maintenance + security.
+
+### Fixed
+- **Dependencies:** patched transitive advisories flagged by Snyk/`npm audit` — `form-data`
+  (CRLF injection, via the Anthropic SDK) and `hono` (path traversal / CORS, via the MCP SDK)
+  bumped to fixed versions; `npm audit` now reports **0 vulnerabilities**. Bumped the dev
+  toolchain (`vitest` 2 → 4) to clear the dev-only `esbuild`/`vite` advisories.
+- **Gemini model id:** docs and the price table referenced the now-retired `gemini-2.0-flash`;
+  switched to `gemini-2.5-flash` (added `gemini-2.5-flash`/`gemini-2.5-pro` pricing) after live
+  testing surfaced a 404.
+
 ## 0.2.0
 
 Multi-model, a sixth pillar, CI gates, a shared corpus, and trustworthy-correctness depth.
